@@ -25,19 +25,19 @@ const RULES_LIST = [
 
 const COORDINATORS = [
   {
-    name: 'John Doe',
+    name: 'Rog',
     role: 'EVENT COMMANDER',
     linkedin: 'https://linkedin.com',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=256&h=256&auto=format&fit=crop'
+    image: 'https://tse1.mm.bing.net/th/id/OIP.DAkYlN_P3OHqm5OuYwyM4gHaJQ?pid=Api&P=0&h=180'
   },
   {
-    name: 'Jane Smith',
+    name: 'Mog',
     role: 'TECHNICAL ARCHITECT',
     linkedin: 'https://linkedin.com',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256&h=256&auto=format&fit=crop'
   },
   {
-    name: 'Alex Vex',
+    name: 'Fog',
     role: 'UPLINK SPECIALIST',
     linkedin: 'https://linkedin.com',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&auto=format&fit=crop'
@@ -45,9 +45,9 @@ const COORDINATORS = [
 ]
 
 const PRIZES = [
-  { rank: 'Titan Winner', amount: '₹50,000', icon: <Trophy className="text-blue-400 w-8 h-8 sm:w-12 sm:h-12" />, perks: ['Paid Internship', 'Cyber Kit V1', 'Artifact #001'] },
-  { rank: 'Nova Runner Up', amount: '₹30,000', icon: <Trophy className="text-indigo-400 w-7 h-7 sm:w-10 sm:h-10" />, perks: ['Internship Access', 'Tech Goodies', 'Artifact #002'] },
-  { rank: 'Pulsar Third', amount: '₹15,000', icon: <Trophy className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" />, perks: ['Network Pass', 'Swag Box', 'Artifact #003'] },
+  { rank: 'Titan Winner', amount: '₹500', icon: <Trophy className="text-blue-400 w-8 h-8 sm:w-12 sm:h-12" />, perks: ['Paid Internship', 'Cyber Kit V1', 'Artifact #001'] },
+  { rank: 'Nova Runner Up', amount: '₹300', icon: <Trophy className="text-indigo-400 w-7 h-7 sm:w-10 sm:h-10" />, perks: ['Internship Access', 'Tech Goodies', 'Artifact #002'] },
+  { rank: 'Pulsar Third', amount: '₹150', icon: <Trophy className="text-slate-400 w-6 h-6 sm:w-8 sm:h-8" />, perks: ['Network Pass', 'Swag Box', 'Artifact #003'] },
 ]
 
 const EVENTS = [
@@ -475,7 +475,6 @@ const App = () => {
         <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-24 sm:pt-32 pb-24 sm:pb-40">
           <SmoothReveal className="flex flex-col items-center w-full">
             <div className="flex items-center justify-center gap-4 mb-10 sm:mb-14">
-              <Layers size={18} className="text-blue-500" />
               <span className="text-blue-500 font-display tracking-[0.8em] sm:tracking-[1.2em] text-xs sm:text-base font-black uppercase leading-none">SIESGST ACM CHAPTER</span>
             </div>
             <div className="relative overflow-visible px-2 sm:px-12 py-4 sm:py-6 group w-full max-w-full font-hero">
