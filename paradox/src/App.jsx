@@ -68,7 +68,7 @@ const COORDINATORS = [
 
 // --- Interactive Components ---
 
-const InteractiveRingParticles = memo(() => {
+const InteractiveFullViewportParticles = memo(() => {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0, active: false });
 
@@ -79,66 +79,76 @@ const InteractiveRingParticles = memo(() => {
     let animationFrameId;
 
     const particles = [];
-    const particleCount = 180; 
-    const innerRadius = 160;
-    const outerRadius = 450;
+    // Increased count to fill the whole screen
+    const particleCount = 450; 
 
     class Particle {
-      constructor() {
-        this.reset();
+      constructor(w, h) {
+        this.init(w, h);
       }
 
-      reset() {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = innerRadius + Math.random() * (outerRadius - innerRadius);
-        this.baseX = Math.cos(angle) * radius;
-        this.baseY = Math.sin(angle) * radius;
+      init(w, h) {
+        // Randomly arrange across the whole viewport
+        this.baseX = Math.random() * w;
+        this.baseY = Math.random() * h;
         this.x = this.baseX;
         this.y = this.baseY;
-        this.size = Math.random() * 2 + 0.5;
-        this.alpha = Math.random() * 0.5 + 0.1;
-        this.velocity = Math.random() * 0.005 + 0.002;
-        this.rotation = angle;
+        // Sharper, smaller size
+        this.size = Math.random() * 1.5 + 0.3;
+        // Increased brightness (higher alpha)
+        this.alpha = Math.random() * 0.8 + 0.2;
+        this.velocity = Math.random() * 0.5 + 0.1;
+        this.angle = Math.random() * Math.PI * 2;
       }
 
       update(mx, my, width, height) {
         if (!width || !height) return;
 
-        this.rotation += this.velocity;
-        const driftX = Math.cos(this.rotation) * 2;
-        const driftY = Math.sin(this.rotation) * 2;
+        // Subtle drifting
+        this.angle += 0.01;
+        const driftX = Math.cos(this.angle) * 2;
+        const driftY = Math.sin(this.angle) * 2;
 
+        // Opposite force movement
         const centerX = width / 2;
         const centerY = height / 2;
+        
+        // Intensity of the "anti-gravity" push
+        const pushFactor = 150;
         const mouseOffsetX = (mx - centerX) / width;
         const mouseOffsetY = (my - centerY) / height;
 
-        // Opposite movement (inverse force)
-        const targetX = this.baseX + (mouseOffsetX * -120) + driftX;
-        const targetY = this.baseY + (mouseOffsetY * -120) + driftY;
+        const targetX = this.baseX + (mouseOffsetX * -pushFactor) + driftX;
+        const targetY = this.baseY + (mouseOffsetY * -pushFactor) + driftY;
 
-        this.x += (targetX - this.x) * 0.05;
-        this.y += (targetY - this.y) * 0.05;
+        // Smooth physics-like movement
+        this.x += (targetX - this.x) * 0.04;
+        this.y += (targetY - this.y) * 0.04;
 
         if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) {
-          this.reset();
+          this.init(width, height);
         }
       }
 
-      draw(context, cx, cy) {
+      draw(context) {
         if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) return;
         
         context.beginPath();
-        context.arc(cx + this.x, cy + this.y, this.size, 0, Math.PI * 2);
-        context.fillStyle = `rgba(198, 163, 85, ${this.alpha})`;
+        context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        // Pure bright white
+        context.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+        // Optional subtle glow for brightness pop without losing sharpness
+        context.shadowBlur = 4;
+        context.shadowColor = 'white';
         context.fill();
+        context.shadowBlur = 0;
       }
     }
 
     const init = () => {
       particles.length = 0;
       for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
+        particles.push(new Particle(canvas.width, canvas.height));
       }
     };
 
@@ -159,12 +169,10 @@ const InteractiveRingParticles = memo(() => {
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
 
       particles.forEach(p => {
         p.update(mouseRef.current.x, mouseRef.current.y, canvas.width, canvas.height);
-        p.draw(ctx, cx, cy);
+        p.draw(ctx);
       });
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -185,7 +193,7 @@ const InteractiveRingParticles = memo(() => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-60" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
 });
 
 const SingularityCore = memo(({ scrollYProgress }) => {
@@ -196,7 +204,10 @@ const SingularityCore = memo(({ scrollYProgress }) => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu">
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#0a0c1f_0%,#02040a_100%)]" />
-      <InteractiveRingParticles />
+      
+      {/* Full Viewport White Particles */}
+      <InteractiveFullViewportParticles />
+      
       <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(16,24,48,0.4)_0%,transparent_70%)]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250vw] h-[1px] bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_40%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.1)_60%,transparent_100%)] blur-[3px] opacity-15" />
       
