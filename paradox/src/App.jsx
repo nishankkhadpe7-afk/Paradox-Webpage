@@ -53,54 +53,139 @@ const CODE_OF_CONDUCT = [
 
 const COORDINATORS = [
   {
-    name: 'Coordinator One',
-    role: 'EVENT COMMANDER',
+    name: 'Human1',
+    role: 'Coordinator 1',
     linkedin: '#',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
   },
   {
-    name: 'Coordinator Two',
-    role: 'TECHNICAL ARCHITECT',
+    name: 'Human2',
+    role: 'Coordinator 2',
     linkedin: '#',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka'
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
   }
 ]
 
-// --- UI Components ---
+// --- Interactive Components ---
 
-const ScatteredStars = memo(() => {
-  const stars = useMemo(() => {
-    return Array.from({ length: 150 }).map((_, i) => ({
-      id: i,
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      size: Math.random() * 2 + 0.5,
-      opacity: Math.random() * 0.7 + 0.3,
-      duration: Math.random() * 3 + 2,
-      delay: Math.random() * 5
-    }));
+const InteractiveRingParticles = memo(() => {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: 0, y: 0, active: false });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    const particles = [];
+    const particleCount = 180; 
+    const innerRadius = 160;
+    const outerRadius = 450;
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = innerRadius + Math.random() * (outerRadius - innerRadius);
+        this.baseX = Math.cos(angle) * radius;
+        this.baseY = Math.sin(angle) * radius;
+        this.x = this.baseX;
+        this.y = this.baseY;
+        this.size = Math.random() * 2 + 0.5;
+        this.alpha = Math.random() * 0.5 + 0.1;
+        this.velocity = Math.random() * 0.005 + 0.002;
+        this.rotation = angle;
+      }
+
+      update(mx, my, width, height) {
+        if (!width || !height) return;
+
+        this.rotation += this.velocity;
+        const driftX = Math.cos(this.rotation) * 2;
+        const driftY = Math.sin(this.rotation) * 2;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const mouseOffsetX = (mx - centerX) / width;
+        const mouseOffsetY = (my - centerY) / height;
+
+        // Opposite movement (inverse force)
+        const targetX = this.baseX + (mouseOffsetX * -120) + driftX;
+        const targetY = this.baseY + (mouseOffsetY * -120) + driftY;
+
+        this.x += (targetX - this.x) * 0.05;
+        this.y += (targetY - this.y) * 0.05;
+
+        if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) {
+          this.reset();
+        }
+      }
+
+      draw(context, cx, cy) {
+        if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) return;
+        
+        context.beginPath();
+        context.arc(cx + this.x, cy + this.y, this.size, 0, Math.PI * 2);
+        context.fillStyle = `rgba(198, 163, 85, ${this.alpha})`;
+        context.fill();
+      }
+    }
+
+    const init = () => {
+      particles.length = 0;
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    };
+
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w > 0 && h > 0) {
+        canvas.width = w;
+        canvas.height = h;
+        init();
+      }
+    };
+
+    const animate = () => {
+      if (canvas.width === 0 || canvas.height === 0) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      particles.forEach(p => {
+        p.update(mouseRef.current.x, mouseRef.current.y, canvas.width, canvas.height);
+        p.draw(ctx, cx, cy);
+      });
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('resize', resize);
+    const handleMouseMove = (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    resize();
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {stars.map((star) => (
-        <motion.div
-          key={star.id}
-          initial={{ opacity: star.opacity }}
-          animate={{ opacity: [star.opacity, 0.2, star.opacity] }}
-          transition={{ duration: star.duration, repeat: Infinity, delay: star.delay, ease: "easeInOut" }}
-          className="absolute bg-white rounded-full"
-          style={{
-            top: star.top,
-            left: star.left,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            boxShadow: `0 0 ${star.size * 2}px white`
-          }}
-        />
-      ))}
-    </div>
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-60" />;
 });
 
 const SingularityCore = memo(({ scrollYProgress }) => {
@@ -110,28 +195,25 @@ const SingularityCore = memo(({ scrollYProgress }) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu">
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#08081a_0%,#020205_100%)]" />
-      <ScatteredStars />
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(26,18,5,0.4)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#0a0c1f_0%,#02040a_100%)]" />
+      <InteractiveRingParticles />
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(16,24,48,0.4)_0%,transparent_70%)]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250vw] h-[1px] bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_40%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.1)_60%,transparent_100%)] blur-[3px] opacity-15" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220vw] h-[120px] bg-[radial-gradient(ellipse_at_center,rgba(198,163,85,0.03)_0%,transparent_70%)] blur-[80px] opacity-10" />
+      
       <motion.div style={{ scale, opacity }} className="absolute inset-0 flex items-center justify-center will-change-transform origin-center z-10">
         <div className="relative flex items-center justify-center">
-            <div className="absolute w-[185px] h-[185px] sm:w-[355px] sm:h-[355px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,rgba(198,163,85,0.05)_40%,transparent_75%)] blur-3xl animate-pulse" />
-            <div className="absolute rounded-full border-[1px] border-white/20 w-[161px] h-[161px] sm:w-[322px] sm:h-[322px] z-[55] shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
-            <div className="absolute rounded-full border-[0.5px] border-amber-400/10 w-[162px] h-[162px] sm:w-[324px] sm:h-[324px] z-[56]" />
-            <div className="w-[160px] h-[160px] sm:w-[320px] sm:h-[320px] rounded-full bg-black z-50 relative overflow-hidden shadow-[0_0_60px_#000]" />
+          <div className="absolute w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.15)_0%,rgba(245,158,11,0.05)_40%,transparent_70%)] blur-3xl animate-pulse" />
+          <div className="absolute w-[185px] h-[185px] sm:w-[355px] sm:h-[355px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,rgba(198,163,85,0.05)_40%,transparent_75%)] blur-3xl animate-pulse" />
+          <div className="absolute w-[190px] h-[190px] sm:w-[380px] sm:h-[380px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.05)_40%,transparent_60%)] blur-3xl z-40 animate-pulse mix-blend-screen" />
+          <div className="absolute rounded-full border-[1px] border-white/20 w-[161px] h-[161px] sm:w-[322px] sm:h-[322px] z-[55] shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
+          <div className="w-[160px] h-[160px] sm:w-[320px] sm:h-[320px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0d1117_0%,#02040a_100%)] z-50 relative overflow-hidden shadow-[inset_-10px_-10px_20px_rgba(255,255,255,0.02),0_4px_100px_rgba(245,158,11,0.5)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-50" />
+          </div>
         </div>
       </motion.div>
     </div>
   )
 })
-
-const ParadoxLogo = () => (
-  <div className="font-outfit font-black tracking-[0.15em] text-white uppercase leading-none">
-    PARA<span className="text-amber-600">DOX</span>
-  </div>
-)
 
 const CountdownTimer = memo(({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
@@ -173,41 +255,37 @@ const CountdownTimer = memo(({ targetDate }) => {
 })
 
 const FancyPrizeBadge = () => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
     className="relative group mt-12 mb-10 w-full max-w-sm sm:max-w-md mx-auto"
   >
     <div className="absolute -inset-2 bg-gradient-to-r from-amber-500/0 via-amber-500/20 to-amber-500/0 rounded-[2.5rem] blur-2xl group-hover:via-amber-500/40 transition-all duration-700" />
-    
     <div className="relative overflow-hidden px-8 py-8 sm:px-12 sm:py-10 bg-black/60 border border-white/10 backdrop-blur-2xl rounded-[2rem] shadow-2xl flex flex-col items-center gap-4">
-        <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+      </div>
+      <div className="flex items-center gap-3 mb-1">
+        <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-amber-500/50" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+          <Sparkles size={12} className="text-amber-500 animate-pulse" />
+          <span className="text-[9px] sm:text-[11px] font-black font-century tracking-[0.4em] text-amber-500 uppercase leading-none">REWARD POOL</span>
         </div>
-
-        <div className="flex items-center gap-3 mb-1">
-           <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-amber-500/50" />
-           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-              <Sparkles size={12} className="text-amber-500 animate-pulse" />
-              <span className="text-[9px] sm:text-[11px] font-black font-century tracking-[0.4em] text-amber-500 uppercase leading-none">REWARD POOL</span>
-           </div>
-           <div className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-amber-500/50" />
-        </div>
-
-        <div className="relative">
-            <div className="absolute -inset-4 bg-amber-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span className="relative text-6xl sm:text-8xl font-black font-outfit text-white tracking-tighter block drop-shadow-lg">
-                ₹1,500<span className="text-amber-500 text-3xl sm:text-5xl ml-1">+</span>
-            </span>
-        </div>
-
-        <div className="flex flex-col items-center gap-1 font-jetbrains opacity-80 group-hover:opacity-100 transition-opacity">
-            <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                <Coins size={14} className="text-amber-500" /> STAKED FOR EXCELLENCE
-            </p>
-            <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-2" />
-        </div>
+        <div className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-amber-500/50" />
+      </div>
+      <div className="relative">
+        <div className="absolute -inset-4 bg-amber-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+        <span className="relative text-6xl sm:text-8xl font-black font-outfit text-white tracking-tighter block drop-shadow-lg">
+          ₹1,500<span className="text-amber-500 text-3xl sm:text-5xl ml-1">+</span>
+        </span>
+      </div>
+      <div className="flex flex-col items-center gap-1 font-jetbrains opacity-80 group-hover:opacity-100 transition-opacity">
+        <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+          <Coins size={14} className="text-amber-500" /> STAKED FOR EXCELLENCE
+        </p>
+        <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-2" />
+      </div>
     </div>
   </motion.div>
 )
@@ -223,7 +301,7 @@ const App = () => {
     if (element) {
       setIsMobileMenuOpen(false)
       const offset = 80
-      const targetY = element.getBoundingClientRect().top + window.pageYOffset - offset;
+      const targetY = element.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top: targetY, behavior: 'smooth' });
     }
   }, [])
@@ -248,16 +326,15 @@ const App = () => {
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [activeSection, navItems])
+  }, [activeSection])
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-black text-zinc-300 selection:bg-amber-600/30 overflow-x-hidden font-jetbrains">
+    <div ref={containerRef} className="relative min-h-screen bg-[#02040a] text-zinc-300 selection:bg-amber-600/30 overflow-x-hidden font-jetbrains">
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture transform-gpu" />
       <SingularityCore scrollYProgress={scrollYProgress} />
 
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-8 flex justify-center pointer-events-auto">
-        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative hidden md:flex items-center gap-1 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl">
+        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative hidden md:flex items-center gap-1 p-1 bg-[#0a0c1f]/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl">
           {navItems.map((item) => (
             <button key={item.id} onClick={() => scrollTo(item.id)} className={`relative px-6 py-3 rounded-full text-[13px] font-inter font-bold uppercase tracking-[0.2em] transition-colors duration-200 z-10 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}>
               {activeSection === item.id && <motion.div layoutId="active-pill" transition={{ type: 'spring', bounce: 0.1, duration: 0.5 }} className="absolute inset-0 rounded-full bg-amber-600/80 shadow-[0_0_15px_rgba(198,163,85,0.3)] -z-10" />}
@@ -265,16 +342,17 @@ const App = () => {
             </button>
           ))}
         </motion.div>
-        
-        {/* Mobile Nav Toggle */}
-        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-6 py-4 bg-black/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl font-century">
+
+        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-6 py-4 bg-[#0a0c1f]/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl font-century">
           <span className="text-sm font-bold tracking-[0.3em] text-amber-500 uppercase">Paradox '26</span>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-white active:scale-90 transition-transform"><XIcon size={24} /></button>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-white active:scale-90 transition-transform">
+            {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="md:hidden absolute top-24 left-4 right-4 bg-black border border-white/10 rounded-3xl backdrop-blur-3xl p-6 shadow-3xl z-[120]">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="md:hidden absolute top-24 left-4 right-4 bg-[#02040a] border border-white/10 rounded-3xl backdrop-blur-3xl p-6 shadow-3xl z-[120]">
               <div className="flex flex-col gap-3">
                 {navItems.map((item) => (
                   <button key={item.id} onClick={() => scrollTo(item.id)} className={`text-left px-6 py-4 rounded-xl text-sm font-bold uppercase tracking-widest font-inter ${activeSection === item.id ? 'bg-amber-600/20 text-white' : 'text-zinc-500 hover:bg-white/5'}`}>{item.label}</button>
@@ -286,7 +364,6 @@ const App = () => {
       </nav>
 
       <main className="relative z-10 w-full transform-gpu">
-        {/* HERO */}
         <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-24 pb-16 relative">
           <div className="flex flex-col items-center max-w-full w-full">
             <span className="text-amber-500/80 tracking-[0.6em] text-sm sm:text-base font-bold uppercase mb-12 font-century">SIESGST ACM CHAPTER PRESENTS</span>
@@ -294,172 +371,153 @@ const App = () => {
               <h1 className="text-6xl sm:text-8xl md:text-[10rem] font-outfit font-black tracking-[0.15em] text-white uppercase leading-none">PARA<span className="text-amber-600">DOX</span></h1>
               <p className="mt-12 text-zinc-400 text-base sm:text-xl font-bold tracking-[0.4em] uppercase font-jetbrains max-w-[90vw] mx-auto leading-relaxed">AN AI HACKATHON WHERE THE KNOWN ENDS</p>
             </div>
-            
             <div className="mb-8 px-10 py-16 rounded-[2.5rem] bg-white/5 backdrop-blur-md border border-white/10 w-full max-w-4xl shadow-3xl">
-                <p className="text-zinc-500 text-sm sm:text-base font-bold tracking-[0.5em] uppercase mb-12 font-century opacity-60 italic">"CERTAIN ONLY IN UNCERTAINTY"</p>
-                <CountdownTimer targetDate="2026-03-07T09:00:00" />
+              <p className="text-zinc-500 text-sm sm:text-base font-bold tracking-[0.5em] uppercase mb-12 font-century opacity-60 italic">"CERTAIN ONLY IN UNCERTAINTY"</p>
+              <CountdownTimer targetDate="2026-03-07T09:00:00" />
             </div>
-
             <FancyPrizeBadge />
-
             <div className="flex flex-col items-center">
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }} 
-                    whileTap={{ scale: 0.95 }} 
-                    onClick={() => scrollTo('register')} 
-                    className="px-14 sm:px-24 py-6 bg-white text-black font-black uppercase tracking-[0.4em] rounded-full shadow-[0_20px_60px_rgba(255,255,255,0.15)] flex items-center gap-6 text-sm sm:text-base hover:bg-zinc-200 transition-all duration-500 font-inter"
-                  >
-                    REGISTRATION <Rocket size={20} />
-                  </motion.button>
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => scrollTo('register')} className="px-14 sm:px-24 py-6 bg-white text-black font-black uppercase tracking-[0.4em] rounded-full shadow-[0_20px_60px_rgba(255,255,255,0.15)] flex items-center gap-6 text-sm sm:text-base hover:bg-zinc-200 transition-all duration-500 font-inter">
+                REGISTRATION <Rocket size={20} />
+              </motion.button>
             </div>
           </div>
         </section>
 
-        {/* EVENT DESCRIPTION */}
         <section id="description" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-56">
           <div className="mb-24 flex flex-col items-center text-center">
-              <div className="flex items-center gap-6 mb-8">
-                <div className="w-20 h-[2px] bg-amber-500/50" />
-                <span className="text-amber-500 font-bold tracking-[0.4em] text-sm sm:text-base uppercase font-century">Operational Intel</span>
-                <div className="w-20 h-[2px] bg-amber-500/50" />
-              </div>
-              <h2 className="text-5xl sm:text-8xl font-black text-white uppercase font-outfit tracking-tight leading-none">EVENT DESCRIPTION</h2>
+            <div className="flex items-center gap-6 mb-8">
+              <div className="w-20 h-[2px] bg-amber-500/50" />
+              <span className="text-amber-500 font-bold tracking-[0.4em] text-sm sm:text-base uppercase font-century">Operational Intel</span>
+              <div className="w-20 h-[2px] bg-amber-500/50" />
+            </div>
+            <h2 className="text-5xl sm:text-8xl font-black text-white uppercase font-outfit tracking-tight leading-none">EVENT DESCRIPTION</h2>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#050505] border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
-                  <div className="absolute top-0 right-0 p-10">
-                      <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
-                          <CpuIcon className="text-amber-500" size={28} />
+            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#0a0c1f]/40 border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
+              <div className="absolute top-0 right-0 p-10">
+                <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
+                  <CpuIcon className="text-amber-500" size={28} />
+                </div>
+              </div>
+              <div className="mb-12">
+                <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase1.id}</p>
+                <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase1.title}</h3>
+                <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase1.subtitle}</p>
+              </div>
+              <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase1.description}</p>
+              <div className="space-y-8">
+                <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century opacity-50">Evaluation Metrics:</p>
+                <div className="grid grid-cols-2 gap-4">
+                  {EVENT_PHASES.phase1.evaluation.map((tag) => (
+                    <div key={tag} className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm sm:text-base text-zinc-300 flex items-center gap-4 transition-all duration-300 hover:border-amber-500/50">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-16 pt-10 border-t border-white/5 font-jetbrains">
+                <div className="space-y-6">
+                  {EVENT_PHASES.phase1.steps.map((step, i) => (
+                    <div key={i} className="flex items-center justify-between group">
+                      <span className="text-xs sm:text-sm font-bold text-amber-500/60 uppercase tracking-widest">{step.time}</span>
+                      <span className="text-sm sm:text-base font-bold text-white group-hover:text-amber-500 transition-colors">{step.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#0a0c1f]/40 border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
+              <div className="absolute top-0 right-0 p-10">
+                <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
+                  <Terminal className="text-amber-500" size={28} />
+                </div>
+              </div>
+              <div className="mb-12">
+                <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase2.id}</p>
+                <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase2.title}</h3>
+                <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase2.subtitle}</p>
+              </div>
+              <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase2.description}</p>
+              <ul className="space-y-8 mb-16 font-jetbrains">
+                {EVENT_PHASES.phase2.features.map((feat, i) => (
+                  <li key={i} className="flex items-center gap-6 group">
+                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-amber-500/20 transition-all duration-500">
+                      <Zap className="text-amber-500" size={22} />
+                    </div>
+                    <span className="text-zinc-300 text-base sm:text-xl leading-relaxed">{feat}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-amber-600/5 rounded-[2.5rem] border border-amber-600/20 p-8 sm:p-12 font-jetbrains">
+                <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century mb-10 opacity-50 flex items-center gap-4">
+                  <Clock size={16} /> Sync Sequence (March 7th):
+                </p>
+                <div className="space-y-10 relative">
+                  <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-amber-500/20" />
+                  {EVENT_PHASES.phase2.schedule.map((item, i) => (
+                    <div key={i} className="flex gap-8 relative z-10">
+                      <div className="w-4 h-4 rounded-full bg-amber-600 mt-1.5 shadow-[0_0_15px_rgba(198,163,85,0.6)] flex-shrink-0" />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-4">
+                          <span className="text-[11px] font-bold text-amber-500 opacity-60">{item.time}</span>
+                          <span className="text-sm sm:text-base font-bold text-white uppercase tracking-wider font-century">{item.label}</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
                       </div>
-                  </div>
-                  <div className="mb-12">
-                      <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase1.id}</p>
-                      <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase1.title}</h3>
-                      <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase1.subtitle}</p>
-                  </div>
-                  <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase1.description}</p>
-                  <div className="space-y-8">
-                      <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century opacity-50">Evaluation Metrics:</p>
-                      <div className="grid grid-cols-2 gap-4">
-                          {EVENT_PHASES.phase1.evaluation.map((tag) => (
-                              <div key={tag} className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm sm:text-base text-zinc-300 flex items-center gap-4 transition-all duration-300 hover:border-amber-500/50">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                  {tag}
-                              </div>
-                          ))}
-                      </div>
-                  </div>
-                  <div className="mt-16 pt-10 border-t border-white/5 font-jetbrains">
-                      <div className="space-y-6">
-                        {EVENT_PHASES.phase1.steps.map((step, i) => (
-                           <div key={i} className="flex items-center justify-between group">
-                              <span className="text-xs sm:text-sm font-bold text-amber-500/60 uppercase tracking-widest">{step.time}</span>
-                              <span className="text-sm sm:text-base font-bold text-white group-hover:text-amber-500 transition-colors">{step.label}</span>
-                           </div>
-                        ))}
-                      </div>
-                  </div>
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#080808] border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
-                  <div className="absolute top-0 right-0 p-10">
-                      <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
-                          <Terminal className="text-amber-500" size={28} />
-                      </div>
-                  </div>
-                  <div className="mb-12">
-                      <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase2.id}</p>
-                      <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase2.title}</h3>
-                      <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase2.subtitle}</p>
-                  </div>
-                  <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase2.description}</p>
-                  <ul className="space-y-8 mb-16 font-jetbrains">
-                      {EVENT_PHASES.phase2.features.map((feat, i) => (
-                        <li key={i} className="flex items-center gap-6 group">
-                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-amber-500/20 transition-all duration-500">
-                              <Zap className="text-amber-500" size={22} />
-                            </div>
-                            <span className="text-zinc-300 text-base sm:text-xl leading-relaxed">{feat}</span>
-                        </li>
-                      ))}
-                  </ul>
-                  <div className="bg-amber-600/5 rounded-[2.5rem] border border-amber-600/20 p-8 sm:p-12 font-jetbrains">
-                      <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century mb-10 opacity-50 flex items-center gap-4">
-                         <Clock size={16} /> Sync Sequence (March 7th):
-                      </p>
-                      <div className="space-y-10 relative">
-                          <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-amber-500/20" />
-                          {EVENT_PHASES.phase2.schedule.map((item, i) => (
-                              <div key={i} className="flex gap-8 relative z-10">
-                                  <div className="w-4 h-4 rounded-full bg-amber-600 mt-1.5 shadow-[0_0_15px_rgba(198,163,85,0.6)] flex-shrink-0" />
-                                  <div className="space-y-2">
-                                      <div className="flex items-center gap-4">
-                                          <span className="text-[11px] font-bold text-amber-500 opacity-60">{item.time}</span>
-                                          <span className="text-sm sm:text-base font-bold text-white uppercase tracking-wider font-century">{item.label}</span>
-                                      </div>
-                                      <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  </div>
-              </motion.div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* JUDGING & CONDUCT */}
         <section id="judging" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-56">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 sm:gap-32 items-start">
-              <div className="space-y-16">
-                  <h2 className="text-5xl sm:text-7xl font-black text-white font-outfit tracking-tight leading-none">Judging Criteria</h2>
-                  <div className="space-y-12 font-jetbrains">
-                     {JUDGING_CRITERIA.map((item, i) => (
-                        <div key={i} className="flex gap-8 group">
-                           <div className="w-1.5 h-16 bg-amber-600/30 group-hover:bg-amber-500 transition-all rounded-full" />
-                           <div className="space-y-2">
-                              <h4 className="text-xl sm:text-2xl font-bold text-white tracking-wide font-century">{item.title}</h4>
-                              <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">{item.desc}</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-              </div>
-              <div className="relative">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 to-amber-900/20 rounded-[4rem] blur-2xl" />
-                 <div className="relative bg-[#050505] border border-white/10 rounded-[4rem] p-12 sm:p-20 backdrop-blur-3xl shadow-3xl font-jetbrains">
-                    <div className="flex items-center gap-6 mb-12">
-                       <AlertTriangle className="text-amber-500" size={36} />
-                       <h3 className="text-4xl sm:text-5xl font-bold text-white font-outfit tracking-tight">Code of Conduct</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 sm:gap-32 items-start">
+            <div className="space-y-16">
+              <h2 className="text-5xl sm:text-7xl font-black text-white font-outfit tracking-tight leading-none">Judging Criteria</h2>
+              <div className="space-y-12 font-jetbrains">
+                {JUDGING_CRITERIA.map((item, i) => (
+                  <div key={i} className="flex gap-8 group">
+                    <div className="w-1.5 h-16 bg-amber-600/30 group-hover:bg-amber-500 transition-all rounded-full" />
+                    <div className="space-y-2">
+                      <h4 className="text-xl sm:text-2xl font-bold text-white tracking-wide font-century">{item.title}</h4>
+                      <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">{item.desc}</p>
                     </div>
-                    <ul className="space-y-8">
-                       {CODE_OF_CONDUCT.map((text, i) => (
-                          <li key={i} className="flex gap-4 group">
-                             <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
-                             <p className="text-zinc-400 text-base sm:text-lg leading-relaxed font-medium tracking-wide">{text}</p>
-                          </li>
-                       ))}
-                    </ul>
-                 </div>
+                  </div>
+                ))}
               </div>
-           </div>
+            </div>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 to-amber-900/20 rounded-[4rem] blur-2xl" />
+              <div className="relative bg-[#0a0c1f]/60 border border-white/10 rounded-[4rem] p-12 sm:p-20 backdrop-blur-3xl shadow-3xl font-jetbrains">
+                <div className="flex items-center gap-6 mb-12">
+                  <AlertTriangle className="text-amber-500" size={36} />
+                  <h3 className="text-4xl sm:text-5xl font-bold text-white font-outfit tracking-tight">Code of Conduct</h3>
+                </div>
+                <ul className="space-y-8">
+                  {CODE_OF_CONDUCT.map((text, i) => (
+                    <li key={i} className="flex gap-4 group">
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
+                      <p className="text-zinc-400 text-base sm:text-lg leading-relaxed font-medium tracking-wide">{text}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* REGISTRATION */}
         <section id="register" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-60">
-          <div className="relative group overflow-hidden rounded-[3rem] sm:rounded-[5rem] p-12 sm:p-24 md:p-32 border border-white/10 bg-[#020202] backdrop-blur-3xl text-center shadow-3xl">
+          <div className="relative group overflow-hidden rounded-[3rem] sm:rounded-[5rem] p-12 sm:p-24 md:p-32 border border-white/10 bg-[#02040a]/80 backdrop-blur-3xl text-center shadow-3xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(198,163,85,0.05),transparent_70%)] opacity-40 pointer-events-none" />
             <div className="relative z-10 flex flex-col items-center">
               <h2 className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tight font-outfit mb-10 leading-tight">Ready to Build the Future?</h2>
               <p className="text-zinc-400 max-w-4xl mx-auto text-base sm:text-xl font-medium leading-relaxed mb-20 font-jetbrains tracking-wide">Registration is exclusively via Unstop. Secure your spot today and stand a chance to win and showcase your talent at SIESGST.</p>
               <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full">
-                <motion.a 
-                  href="#" 
-                  target="_blank" 
-                  whileHover={{ scale: 1.05 }} 
-                  whileTap={{ scale: 0.95 }} 
-                  className="group flex items-center justify-center gap-4 px-12 py-6 sm:px-16 sm:py-7 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full shadow-2xl hover:bg-amber-500 hover:text-white transition-all duration-300 text-sm sm:text-base font-bold font-inter"
-                >
+                <motion.a href="#" target="_blank" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="group flex items-center justify-center gap-4 px-12 py-6 sm:px-16 sm:py-7 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full shadow-2xl hover:bg-amber-500 hover:text-white transition-all duration-300 text-sm sm:text-base font-bold font-inter">
                   REGISTER ON UNSTOP <ExternalLink size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </motion.a>
                 <div className="flex flex-col items-center md:items-start opacity-70">
@@ -471,33 +529,32 @@ const App = () => {
           </div>
         </section>
 
-        {/* COORDINATORS */}
-        <section id="coordinators" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-56 text-center">
-            <h2 className="text-4xl sm:text-7xl md:text-9xl font-bold tracking-tighter text-white uppercase mb-40 font-outfit">COORDINATORS</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 sm:gap-20 max-w-5xl mx-auto">
-              {COORDINATORS.map((person, i) => (
-                <motion.div key={i} whileHover={{ y: -15 }} className="relative flex flex-col items-center p-16 sm:p-24 rounded-[4rem] border border-white/10 bg-zinc-950/40 group transition-all duration-700 backdrop-blur-3xl shadow-3xl overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:opacity-100 opacity-30 transition-opacity" />
-                  <div className="relative mb-14 flex justify-center">
-                    <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 scale-110" />
-                    <div className="relative w-56 h-56 sm:w-72 sm:h-72 flex-shrink-0">
-                      <img src={person.image} alt={person.name} className="w-full h-full rounded-full object-cover border border-white/10 group-hover:border-amber-500/30 transition-all duration-700 shadow-xl grayscale group-hover:grayscale-0 z-10" />
-                    </div>
+        <section id="coordinators" className="max-w-7xl mx-auto px-6 sm:px-10 pt-32 pb-10 sm:pt-56 sm:pb-20 text-center">
+          <h2 className="text-4xl sm:text-7xl md:text-9xl font-bold tracking-tighter text-white uppercase mb-40 font-outfit">COORDINATORS</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 sm:gap-20 max-w-5xl mx-auto">
+            {COORDINATORS.map((person, i) => (
+              <motion.div key={i} whileHover={{ y: -15 }} className="relative flex flex-col items-center p-16 sm:p-24 rounded-[4rem] border border-white/10 bg-[#0a0c1f]/40 group transition-all duration-700 backdrop-blur-3xl shadow-3xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:opacity-100 opacity-30 transition-opacity" />
+                <div className="relative mb-14 flex justify-center">
+                  <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 scale-110" />
+                  <div className="relative w-56 h-56 sm:w-72 sm:h-72 flex-shrink-0">
+                    <img src={person.image} alt={person.name} className="w-full h-full rounded-full object-cover border border-white/10 group-hover:border-amber-500/30 transition-all duration-700 shadow-xl grayscale group-hover:grayscale-0 z-10" />
                   </div>
-                  <div className="text-center z-10 font-jetbrains">
-                    <h4 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tighter mb-5 font-outfit">{person.name}</h4>
-                    <p className="text-base text-amber-500 font-bold uppercase tracking-[0.4em] mb-14 font-century">{person.role}</p>
-                    <a href={person.linkedin} target="_blank" className="flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 transition-all duration-300 hover:bg-amber-600/20 group shadow-lg">
-                      <Linkedin size={26} className="text-amber-500 transition-transform group-hover:scale-110" />
-                    </a>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+                <div className="text-center z-10 font-jetbrains">
+                  <h4 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tighter mb-5 font-outfit">{person.name}</h4>
+                  <p className="text-base text-amber-500 font-bold uppercase tracking-[0.4em] mb-14 font-century">{person.role}</p>
+                  <a href={person.linkedin} target="_blank" className="flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 transition-all duration-300 hover:bg-amber-600/20 group shadow-lg">
+                    <Linkedin size={26} className="text-amber-500 transition-transform group-hover:scale-110" />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </section>
       </main>
 
-      <footer className="py-32 sm:py-56 text-center border-t border-white/5 bg-black relative z-10 font-jetbrains">
+      <footer className="pt-10 pb-32 sm:pt-20 sm:pb-56 text-center border-t border-white/5 bg-[#02040a] relative z-10 font-jetbrains">
         <div className="flex flex-col items-center justify-center gap-16 mb-32">
           <h2 className="font-bold tracking-[1.8em] sm:tracking-[2.5em] text-3xl sm:text-6xl text-white uppercase ml-[1.5em] font-outfit opacity-15 leading-none">PARADOX</h2>
           <div className="flex justify-center items-center gap-14 sm:gap-24 opacity-30 hover:opacity-100 transition-opacity duration-700">
@@ -517,22 +574,20 @@ const App = () => {
           --font-century: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
           --font-inter: 'Inter', sans-serif; 
         }
-        body { background-color: black; color: white; overflow-x: hidden; -webkit-font-smoothing: antialiased; margin: 0; font-family: var(--font-jetbrains); width: 100%; }
+        body { background-color: #02040a; color: white; overflow-x: hidden; -webkit-font-smoothing: antialiased; margin: 0; font-family: var(--font-jetbrains); width: 100%; }
         .font-outfit { font-family: var(--font-outfit); }
         .font-jetbrains { font-family: var(--font-jetbrains); }
         .font-century { font-family: var(--font-century); }
         .font-inter { font-family: var(--font-inter); }
-        .animate-pulse-viscous { animation: pulseViscous 8s infinite ease-in-out; }
-        @keyframes pulseViscous { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.85; } }
-        @keyframes spin3D { 0% { transform: rotateX(72deg) rotateY(0deg); } 100% { transform: rotateX(72deg) rotateY(360deg); } }
-        .animate-spin-3d-slow { animation: spin3D 100s linear infinite; }
+        
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
         .animate-shimmer { animation: shimmer 3s infinite linear; }
         .grain-texture { background-image: url('https://grainy-gradients.vercel.app/noise.svg'); filter: contrast(180%) brightness(120%); pointer-events: none; }
-        .fluid-hero-text { font-size: clamp(2.5rem, 12vw, 10rem); white-space: nowrap; }
+        
+        ::selection { background: rgba(198, 163, 85, 0.3); }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #222; }
+        ::-webkit-scrollbar-track { background: #02040a; }
+        ::-webkit-scrollbar-thumb { background: #1a1c2e; }
         html { scroll-behavior: smooth; }
         .shadow-3xl { box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.95); }
       `}</style>
