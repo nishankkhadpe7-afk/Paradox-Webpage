@@ -9,6 +9,7 @@ import {
   FileText, ShieldAlert, Gift, Camera
 } from 'lucide-react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion'
+import logo from './assets/image 4.png';
 
 // --- Data Constants ---
 const ELIGIBILITY = [
@@ -74,7 +75,7 @@ const COORDINATORS = [
 
 // --- Components ---
 
-const LiquidGlassCard = ({ children, className = "" }) => {
+const LiquidGlassCard = memo(({ children, className = "" }) => {
   const cardRef = useRef(null);
 
   const handleMouseMove = (e) => {
@@ -90,12 +91,12 @@ const LiquidGlassCard = ({ children, className = "" }) => {
     <motion.div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] liquid-glass-effect ${className}`}
+      className={`backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] liquid-glass-effect transform-gpu ${className}`}
     >
       {children}
     </motion.div>
   );
-};
+});
 
 const InteractiveStars = memo(() => {
   const canvasRef = useRef(null);
@@ -108,7 +109,7 @@ const InteractiveStars = memo(() => {
     const ctx = canvas.getContext('2d', { alpha: true });
     let animationFrameId;
     const particles = [];
-    const particleCount = window.innerWidth < 768 ? 60 : 180; 
+    const particleCount = window.innerWidth < 768 ? 100 : 250; 
 
     class Star {
       constructor(w, h) { this.init(w, h); }
@@ -117,11 +118,11 @@ const InteractiveStars = memo(() => {
         this.baseY = Math.random() * h;
         this.x = this.baseX;
         this.y = this.baseY;
-        this.size = Math.random() * 1.1 + 0.3;
+        this.size = Math.random() * 1.2 + 0.4;
         this.depth = Math.random() * 0.6 + 0.2;
-        this.alpha = Math.random() * 0.3 + 0.1;
-        this.driftX = (Math.random() - 0.5) * 0.12;
-        this.driftY = (Math.random() - 0.5) * 0.12;
+        this.alpha = Math.random() * 0.6 + 0.3;
+        this.driftX = (Math.random() - 0.5) * 0.1;
+        this.driftY = (Math.random() - 0.5) * 0.1;
       }
       update(w, h, mx, my) {
         this.baseX += this.driftX;
@@ -132,15 +133,20 @@ const InteractiveStars = memo(() => {
         if (this.baseY > h) this.baseY = 0;
         const centerX = w / 2;
         const centerY = h / 2;
-        const targetX = this.baseX + (mx - centerX) * (this.depth * 0.08);
-        const targetY = this.baseY + (my - centerY) * (this.depth * 0.08);
-        this.x += (targetX - this.x) * 0.08;
-        this.y += (targetY - this.y) * 0.08;
+        const targetX = this.baseX + (mx - centerX) * (this.depth * 0.05);
+        const targetY = this.baseY + (my - centerY) * (this.depth * 0.05);
+        this.x += (targetX - this.x) * 0.1;
+        this.y += (targetY - this.y) * 0.1;
       }
-      draw(context, w, h) {
+      draw(context) {
+        context.fillStyle = `rgba(255, 255, 255, ${this.alpha * 0.3})`;
+        context.beginPath();
+        context.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
         context.beginPath();
         context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        context.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
         context.fill();
       }
     }
@@ -161,7 +167,7 @@ const InteractiveStars = memo(() => {
       const { x: mx, y: my } = mouseRef.current;
       for (let i = 0; i < particles.length; i++) {
         particles[i].update(w, h, mx, my);
-        particles[i].draw(ctx, w, h);
+        particles[i].draw(ctx);
       }
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -172,7 +178,7 @@ const InteractiveStars = memo(() => {
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       mouseRef.current = { x: clientX, y: clientY };
     }
-    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mousemove', handleMove, { passive: true });
     setupCanvas(); animate();
     return () => {
       window.removeEventListener('resize', setupCanvas);
@@ -181,39 +187,39 @@ const InteractiveStars = memo(() => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full opacity-60 pointer-events-none z-0" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full opacity-70 pointer-events-none z-0 transform-gpu" />;
 });
 
 const SingularityCore = memo(({ scrollYProgress }) => {
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 35, damping: 25, mass: 1 })
-  const scale = useTransform(smoothProgress, [0, 0.45, 1], [0.8, 1.1, 2.8])
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 45, damping: 30, mass: 1 })
+  const scale = useTransform(smoothProgress, [0, 0.45, 1], [0.85, 1.1, 2.5])
   const opacity = useTransform(smoothProgress, [0, 0.1, 0.9, 1], [1, 1, 1, 1])
-  const rotateScroll = useTransform(smoothProgress, [0, 1], [0, 15])
+  const rotateScroll = useTransform(smoothProgress, [0, 1], [0, 10])
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu translate-z-0">
       <div className="absolute inset-0 bg-[#02040a]" />
       <InteractiveStars />
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.06)_0%,rgba(16,24,48,0.1)_40%,transparent_75%)]" />
-      <motion.div style={{ scale, opacity, rotate: rotateScroll }} className="absolute inset-0 flex items-center justify-center will-change-transform origin-center z-10">
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.06)_0%,rgba(16,24,48,0.1)_40%,transparent_75%)]" />
+      <motion.div style={{ scale, opacity, rotate: rotateScroll }} className="absolute inset-0 flex items-center justify-center will-change-transform transform-gpu origin-center z-10">
         <div className="relative flex items-center justify-center">
-          {/* Backing Ambient Aura */}
-          <div className="absolute w-[65vw] h-[65vw] max-w-[700px] max-h-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08)_0%,transparent_75%)] blur-lg animate-slow-pulse" />
+          <div className="absolute w-[80vw] h-[80vw] md:w-[60vw] md:h-[60vw] max-w-[650px] max-h-[650px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.06)_0%,transparent_75%)] blur-md animate-slow-pulse" />
           
-          {/* Orbital Ring */}
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute w-[45vw] h-[15vw] max-w-[550px] max-h-[180px] rounded-[100%] border-[8px] border-amber-500/15 blur-sm opacity-40" style={{ transform: "rotateX(75deg) rotateY(10deg)" }} />
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute w-[70vw] h-[25vw] md:w-[45vw] md:h-[15vw] max-w-[550px] max-h-[180px] rounded-[100%] border-[4px] md:border-[6px] border-amber-500/10 blur-sm opacity-30" style={{ transform: "rotateX(75deg) rotateY(10deg)" }} />
           
-          {/* Event Horizon Glow (Requested Change: Orange Emission) */}
-          <div className="absolute w-[31vw] h-[31vw] max-w-[335px] max-h-[335px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.5)_0%,rgba(245,158,11,0.2)_40%,transparent_70%)] blur-[15px]" />
+          <div className="absolute w-[42vw] h-[42vw] md:w-[31vw] md:h-[31vw] max-w-[335px] max-h-[335px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.4)_0%,rgba(245,158,11,0.1)_40%,transparent_70%)] blur-[10px]" />
           
-          {/* Main Black Sphere with specific Orange glow borders */}
-          <div className="w-[30vw] h-[30vw] max-w-[320px] max-h-[320px] rounded-full bg-black z-50 relative border border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.4),inset_0_0_80px_rgba(0,0,0,1)] overflow-hidden">
-            <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0%,rgba(245,158,11,0.1)_20%,transparent_40%,rgba(16,24,48,0.1)_60%,transparent_80%,transparent_100%)] opacity-30 blur-md" />
-            <div className="absolute top-[10%] left-[15%] w-[35%] h-[35%] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_80%)] blur-sm" />
-            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,transparent_42%,rgba(245,158,11,0.03)_48%,rgba(245,158,11,0.1)_58%,transparent_72%)]" />
-            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,transparent_50%,#000_92%)] opacity-95" />
+          <div className="relative flex items-center justify-center translate-z-0">
+            <div className="absolute w-[41vw] h-[41vw] md:w-[30.5vw] md:h-[30.5vw] max-w-[324px] max-h-[324px] rounded-full bg-amber-600/40 blur-[8px] shadow-[0_0_30px_rgba(245,158,11,0.6)]" />
+            
+            <div className="w-[40vw] h-[40vw] md:w-[30vw] md:h-[30vw] max-w-[320px] max-h-[320px] rounded-full bg-black z-50 relative border border-amber-500/70 shadow-[inset_0_0_80px_rgba(0,0,0,1)] overflow-hidden">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0%,rgba(245,158,11,0.08)_20%,transparent_40%,rgba(16,24,48,0.08)_60%,transparent_80%,transparent_100%)] opacity-20 blur-sm" />
+              <div className="absolute top-[10%] left-[15%] w-[35%] h-[35%] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04)_0%,transparent_80%)] blur-sm" />
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,transparent_42%,rgba(245,158,11,0.02)_48%,rgba(245,158,11,0.08)_58%,transparent_72%)]" />
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,transparent_50%,#000_92%)] opacity-95" />
+            </div>
           </div>
-          <div className="absolute w-1 h-[80vh] bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-md" />
+          <div className="absolute w-1 h-[70vh] bg-gradient-to-b from-transparent via-amber-500/5 to-transparent blur-sm" />
         </div>
       </motion.div>
     </div>
@@ -239,11 +245,11 @@ const CountdownTimer = memo(({ targetDate }) => {
   }, [targetDate])
   const items = [{ v: timeLeft.days, l: "Days" }, { v: timeLeft.hours, l: "Hrs" }, { v: timeLeft.minutes, l: "Min" }, { v: timeLeft.seconds, l: "Sec" }];
   return (
-    <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-8 md:gap-10 font-phonk text-2xl sm:text-5xl md:text-7xl text-white tracking-tighter tabular-nums uppercase">
+    <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 md:gap-10 font-phonk text-2xl sm:text-4xl md:text-7xl text-white tracking-tighter tabular-nums uppercase">
       {items.map((item, idx) => (
         <div key={idx} className="flex flex-col items-center">
           <div className="leading-none">{item.v.toString().padStart(2, '0')}</div>
-          <span className="font-jakarta text-[10px] sm:text-[10px] text-zinc-500 tracking-[0.2em] mt-2 sm:mt-3 capitalize">{item.l}</span>
+          <span className="font-jakarta text-[8px] sm:text-[10px] text-zinc-500 tracking-[0.2em] mt-1 sm:mt-3 capitalize">{item.l}</span>
         </div>
       ))}
     </div>
@@ -253,25 +259,25 @@ const CountdownTimer = memo(({ targetDate }) => {
 const PrizePoolCard = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-100, 100], [12, -12]);
-  const rotateY = useTransform(mouseX, [-100, 100], [-12, 12]);
-  const sprRotateX = useSpring(rotateX, { damping: 30, stiffness: 150 });
-  const sprRotateY = useSpring(rotateY, { damping: 30, stiffness: 150 });
+  const rotateX = useTransform(mouseY, [-100, 100], [10, -10]);
+  const rotateY = useTransform(mouseX, [-100, 100], [-10, 10]);
+  const sprRotateX = useSpring(rotateX, { damping: 35, stiffness: 200 });
+  const sprRotateY = useSpring(rotateY, { damping: 35, stiffness: 200 });
   function handleMouseMove(event) {
     const rect = event.currentTarget.getBoundingClientRect();
-    mouseX.set(((event.clientX - rect.left) / rect.width - 0.5) * 200);
-    mouseY.set(((event.clientY - rect.top) / rect.height - 0.5) * 200);
+    mouseX.set(((event.clientX - rect.left) / rect.width - 0.5) * 160);
+    mouseY.set(((event.clientY - rect.top) / rect.height - 0.5) * 160);
   }
   return (
-    <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} className="relative flex flex-col items-center my-12" style={{ perspective: 1000 }}>
+    <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} className="relative flex flex-col items-center my-8 md:my-12 px-4 w-full" style={{ perspective: 1200 }}>
       <motion.div onMouseMove={handleMouseMove} onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
         style={{ rotateX: sprRotateX, rotateY: sprRotateY, transformStyle: "preserve-3d" }}
-        className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-[4/5] bg-white/[0.04] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center p-10 overflow-hidden shadow-2xl group hover:border-amber-500/40"
+        className="relative w-full max-w-[260px] sm:max-w-[340px] aspect-[4/5] bg-white/[0.04] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center p-6 sm:p-10 overflow-hidden shadow-2xl group hover:border-amber-500/40 transform-gpu"
       >
-        <div className="flex flex-col items-center">
-          <h2 className="font-keania text-5xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] text-center uppercase">PRIZE<br/>POOL</h2>
-          <div className="w-16 h-[2px] bg-amber-500/60 my-8 rounded-full" />
-          <p className="font-keania text-3xl sm:text-5xl text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors duration-500 uppercase">15000/- Rs</p>
+        <div className="flex flex-col items-center text-center">
+          <h2 className="font-keania text-4xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] uppercase">PRIZE<br/>POOL</h2>
+          <div className="w-12 sm:w-16 h-[2px] bg-amber-500/60 my-6 sm:my-8 rounded-full" />
+          <p className="font-keania text-2xl sm:text-5xl text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors duration-500 uppercase">15000/- Rs</p>
         </div>
       </motion.div>
     </motion.div>
@@ -296,7 +302,7 @@ const App = () => {
     }
   }, [])
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { label: 'Home', id: 'home' },
     { label: 'About', id: 'about' },
     { label: 'Rounds', id: 'rounds' },
@@ -304,24 +310,33 @@ const App = () => {
     { label: 'Judging', id: 'judging' },
     { label: 'Coordinators', id: 'coordinators' },
     { label: 'Registration', id: 'register' }
-  ]
+  ], [])
 
   useEffect(() => {
+    let timeoutId;
     const handleScroll = () => {
       if (isScrollingManually.current) return
-      const sections = navItems.map(item => document.getElementById(item.id))
-      const current = sections.find(section => section && section.getBoundingClientRect().top >= -350 && section.getBoundingClientRect().top <= 350)
-      if (current && current.id !== activeSection) setActiveSection(current.id)
+      
+      if (timeoutId) return;
+      timeoutId = setTimeout(() => {
+        const sections = navItems.map(item => document.getElementById(item.id))
+        const current = sections.find(section => section && section.getBoundingClientRect().top >= -300 && section.getBoundingClientRect().top <= 300)
+        if (current && current.id !== activeSection) setActiveSection(current.id)
+        timeoutId = null;
+      }, 100);
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (timeoutId) clearTimeout(timeoutId);
+    }
   }, [activeSection, navItems])
 
   const sectionAnimation = {
     initial: { opacity: 0, y: 30 },
     whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: "-100px" },
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+    viewport: { once: true, margin: "-80px" },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
   }
 
   return (
@@ -329,72 +344,124 @@ const App = () => {
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture" />
       <SingularityCore scrollYProgress={scrollYProgress} />
 
-      {/* Nav Bar (Requested Change: Inter Font, Bold) */}
-      <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-10 flex justify-center pointer-events-auto">
-        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative hidden md:flex items-center gap-1 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-10 flex justify-center items-center gap-2 md:gap-6 pointer-events-auto">
+        
+        {/* Logo Container - Optimized for local asset path */}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }} 
+          animate={{ opacity: 1, x: 0 }} 
+          className="hidden md:flex items-center justify-center shrink-0 min-w-[40px]"
+        >
+          <img 
+            src={logo} 
+            alt="Logo" 
+            className="h-10 lg:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+            onLoad={(e) => { e.target.style.opacity = 1; }}
+            onError={(e) => { 
+              console.error("Logo failed to load at /assets/image4.png");
+               // Optionally fallback to a placeholder if you want
+               // e.target.src = "https://placehold.co/40x40/black/white?text=LOGO";
+            }}
+          />
+        </motion.div>
+
+        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative hidden md:flex items-center gap-1 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl transform-gpu">
           {navItems.map((item) => (
             <button 
               key={item.id} 
               onClick={() => scrollTo(item.id)} 
-              className={`relative px-5 lg:px-6 py-3 rounded-full text-[10px] lg:text-[11px] font-inter font-bold uppercase tracking-widest transition-all duration-300 z-10 hover:bg-white/10 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}
+              className={`relative px-4 lg:px-6 py-2.5 lg:py-3 rounded-full text-[9px] lg:text-[11px] font-inter font-bold uppercase tracking-widest transition-all duration-300 z-10 hover:bg-white/5 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}
             >
               {activeSection === item.id && <motion.div layoutId="active-pill" className="absolute inset-0 rounded-full bg-amber-600/90 -z-10 shadow-[0_0_15px_rgba(217,119,6,0.5)]" transition={{ type: "spring", stiffness: 400, damping: 35 }} />}
               {item.label}
             </button>
           ))}
         </motion.div>
-        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-5 py-4 bg-black/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl font-inter font-bold">
-          <span className="text-[10px] tracking-widest text-amber-500 uppercase">PARADOX</span>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-white active:scale-90 transition-transform">{isMobileMenuOpen ? <XIcon size={18} /> : <Menu size={18} />}</button>
+
+        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-4 py-3 bg-black/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl font-inter font-bold transform-gpu relative overflow-hidden">
+          <span className="text-[10px] tracking-widest text-amber-500 uppercase">PARADOX26'</span>
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="p-2 text-white active:scale-90 transition-transform relative z-[120]"
+          >
+            {isMobileMenuOpen ? <XIcon size={18} /> : <Menu size={18} />}
+          </button>
+          
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="fixed top-[70px] left-4 right-4 bg-black/90 border border-white/10 backdrop-blur-2xl rounded-[2rem] p-6 shadow-4xl flex flex-col gap-3 z-[115]"
+              >
+                {navItems.map((item) => (
+                  <button 
+                    key={item.id} 
+                    onClick={() => scrollTo(item.id)} 
+                    className={`w-full py-4 text-xs font-bold uppercase tracking-widest rounded-2xl border border-white/5 ${activeSection === item.id ? 'bg-amber-600 text-white' : 'bg-white/5 text-zinc-400'}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </nav>
 
       <main className="relative z-10 w-full transform-gpu">
-        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-6 text-center pt-20 pb-8 sm:pb-12">
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col items-center w-full max-w-5xl">
-            <span className="font-phonk text-amber-500/80 tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 sm:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
-            <div className="relative mb-8 sm:mb-10 w-full">
-              <h1 className="text-[clamp(2.5rem,12vw,11rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">PARA<span className="text-amber-600">DOX</span></h1>
-              <p className="mt-4 sm:mt-6 font-phonk text-zinc-400 text-[10px] sm:text-sm font-bold tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80">CERTAIN ONLY IN UNCERTAINTY</p>
+        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-32 sm:pt-40 pb-8 sm:pb-12">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="flex flex-col items-center w-full max-w-5xl">
+            <span className="font-phonk text-amber-500/80 tracking-[0.3em] md:tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 md:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
+            <div className="relative mb-6 md:mb-10 w-full">
+              <h1 className="text-[clamp(2.5rem,10vw,11rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">PARA<span className="text-amber-600">DOX</span></h1>
+              <p className="mt-4 sm:mt-6 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.15em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80">CERTAIN ONLY IN UNCERTAINTY</p>
             </div>
             
-            <LiquidGlassCard className="mb-2 px-4 sm:px-8 py-8 sm:py-10 rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-4xl">
+            <LiquidGlassCard className="mb-2 px-4 sm:px-8 py-6 sm:py-10 rounded-[1.5rem] sm:rounded-[2.5rem] w-full max-w-4xl">
               <CountdownTimer targetDate="2026-03-05T09:00:00" />
             </LiquidGlassCard>
 
             <PrizePoolCard />
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => scrollTo('register')} className="px-10 sm:px-20 py-5 bg-white text-black font-phonk uppercase tracking-[0.2em] rounded-full text-[10px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-lg">Registration Process</motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} 
+              onClick={() => scrollTo('register')} 
+              className="px-8 sm:px-20 py-4 sm:py-5 bg-white text-black font-phonk uppercase tracking-[0.2em] rounded-full text-[9px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-lg active:scale-95"
+            >
+              Registration Process
+            </motion.button>
           </motion.div>
         </section>
 
-        <motion.section id="about" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24">
-          <div className="mb-16 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-7xl font-phonk text-white uppercase mb-4">About the Hackathon</h2>
+        <motion.section id="about" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+          <div className="mb-12 md:mb-16 flex flex-col items-center text-center">
+            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">About the Hackathon</h2>
             <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="space-y-8 font-jakarta text-zinc-300 leading-relaxed font-medium">
-              <p className="text-lg sm:text-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
+            <div className="space-y-6 md:space-y-8 font-jakarta text-zinc-300 leading-relaxed font-medium">
+              <p className="text-base sm:text-xl">
                 Paradox is an inter-collegiate Agentic AI Hackathon designed to bring together innovative minds to build intelligent, autonomous AI-driven solutions. The hackathon encourages creativity, problem-solving, and hands-on implementation using Agentic AI concepts and modern technologies.
               </p>
-              <LiquidGlassCard className="p-8 rounded-[2rem]">
-                <p className="text-sm text-zinc-400 font-semibold italic">
+              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem]">
+                <p className="text-xs sm:text-sm text-zinc-400 font-semibold italic">
                   The problem statement will be declared on the hackathon day to ensure fairness and originality.
                 </p>
               </LiquidGlassCard>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 font-jakarta">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 font-jakarta">
               {[
                 { icon: Calendar, label: 'Date', val: '5th March 2026' },
                 { icon: MapPin, label: 'Venue', val: 'SIESGST, Navi Mumbai' },
                 { icon: Clock, label: 'Duration', val: '10 Hours intensive' },
                 { icon: CreditCard, label: 'Fee', val: '₹350 (Refund available)' }
               ].map((item, i) => (
-                <LiquidGlassCard key={i} className="p-6 rounded-3xl flex flex-col gap-4">
-                  <item.icon size={24} className="text-amber-500" />
+                <LiquidGlassCard key={i} className="p-5 md:p-6 rounded-2xl md:rounded-3xl flex flex-col gap-3 md:gap-4">
+                  <item.icon size={20} className="text-amber-500" />
                   <div>
-                    <p className="font-phonk text-[14px] text-zinc-500 uppercase tracking-widest mb-1">{item.label}</p>
-                    <p className="text-sm font-bold text-white">{item.val}</p>
+                    <p className="font-phonk text-[10px] md:text-[14px] text-zinc-500 uppercase tracking-widest mb-1">{item.label}</p>
+                    <p className="text-xs md:text-sm font-bold text-white">{item.val}</p>
                   </div>
                 </LiquidGlassCard>
               ))}
@@ -402,32 +469,32 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.section id="eligibility" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 bg-white/[0.01] rounded-[4rem]">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <motion.section id="eligibility" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24 md:bg-white/[0.01] md:rounded-[4rem]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20">
             <div>
-              <h2 className="text-3xl sm:text-5xl font-phonk text-white uppercase mb-12">Eligibility Criteria</h2>
-              <div className="space-y-10 font-jakarta">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-phonk text-white uppercase mb-8 md:mb-12">Eligibility Criteria</h2>
+              <div className="space-y-8 md:space-y-10 font-jakarta">
                 {ELIGIBILITY.map((item, i) => (
-                  <div key={i} className="flex gap-6 items-start">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <item.icon size={22} className="text-amber-500" />
+                  <div key={i} className="flex gap-4 md:gap-6 items-start">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <item.icon size={20} className="text-amber-500" />
                     </div>
                     <div>
-                      <h4 className="font-phonk text-base text-white uppercase tracking-widest mb-2">{item.title}</h4>
-                      <p className="text-base text-zinc-500 leading-relaxed font-medium">{item.desc}</p>
+                      <h4 className="font-phonk text-sm md:text-base text-white uppercase tracking-widest mb-2">{item.title}</h4>
+                      <p className="text-sm md:text-base text-zinc-500 leading-relaxed font-medium">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h2 className="text-3xl sm:text-5xl font-phonk text-white uppercase mb-12">Team Formation Rules</h2>
-              <LiquidGlassCard className="p-10 rounded-[3rem]">
-                <ul className="space-y-6">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-phonk text-white uppercase mb-8 md:mb-12">Team Formation Rules</h2>
+              <LiquidGlassCard className="p-8 md:p-10 rounded-[2rem] md:rounded-[3rem]">
+                <ul className="space-y-5 md:space-y-6">
                   {TEAM_RULES.map((rule, i) => (
                     <li key={i} className="flex gap-4 items-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      <p className="text-base sm:text-lg font-jakarta text-zinc-300 font-medium">{rule}</p>
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <p className="text-sm sm:text-lg font-jakarta text-zinc-300 font-medium">{rule}</p>
                     </li>
                   ))}
                 </ul>
@@ -436,56 +503,56 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.section id="rounds" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 font-jakarta">
-          <div className="mb-16 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-7xl font-phonk text-white uppercase mb-4">Hackathon Format</h2>
+        <motion.section id="rounds" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24 font-jakarta">
+          <div className="mb-12 md:mb-16 flex flex-col items-center text-center">
+            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Hackathon Format</h2>
             <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
             {ROUNDS.map((round, i) => (
-              <LiquidGlassCard key={i} className="group relative p-10 rounded-[3rem] overflow-hidden hover:border-amber-500/30">
-                <div className="absolute top-0 right-0 p-8 font-phonk text-6xl text-white/5 select-none">{round.id}</div>
-                <h3 className="font-phonk text-lg text-amber-500 uppercase tracking-widest mb-8">{round.title}</h3>
-                <div className="space-y-6 relative z-10">
-                  <p className="text-zinc-300 font-medium leading-relaxed">{round.desc}</p>
-                  <div className="p-6 rounded-2xl bg-white/5 border border-white/5 text-base text-zinc-400 italic">{round.eval}</div>
-                  <p className="text-sm text-amber-500 font-bold tracking-wide">{round.footer}</p>
+              <LiquidGlassCard key={i} className="group relative p-8 md:p-10 rounded-[2rem] md:rounded-[3rem] overflow-hidden hover:border-amber-500/30">
+                <div className="absolute top-0 right-0 p-6 md:p-8 font-phonk text-4xl md:text-6xl text-white/5 select-none">{round.id}</div>
+                <h3 className="font-phonk text-sm md:text-lg text-amber-500 uppercase tracking-widest mb-6 md:mb-8">{round.title}</h3>
+                <div className="space-y-5 md:space-y-6 relative z-10">
+                  <p className="text-sm md:text-base text-zinc-300 font-medium leading-relaxed">{round.desc}</p>
+                  <div className="p-5 md:p-6 rounded-2xl bg-white/5 border border-white/5 text-xs md:text-base text-zinc-400 italic">{round.eval}</div>
+                  <p className="text-xs md:text-sm text-amber-500 font-bold tracking-wide">{round.footer}</p>
                 </div>
               </LiquidGlassCard>
             ))}
           </div>
         </motion.section>
 
-        <motion.section id="rules" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 font-jakarta">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <LiquidGlassCard className="p-10 rounded-[3rem]">
-              <div className="flex items-center gap-4 mb-10">
-                <ShieldAlert className="text-amber-500" size={32} />
-                <h2 className="text-3xl font-phonk text-white uppercase">Hackathon Rules</h2>
+        <motion.section id="rules" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24 font-jakarta">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+            <LiquidGlassCard className="p-10 rounded-[2rem] md:rounded-[3rem]">
+              <div className="flex items-center gap-4 mb-8 md:mb-10">
+                <ShieldAlert className="text-amber-500 w-7 h-7 md:w-8 md:h-8" />
+                <h2 className="text-2xl md:text-3xl font-phonk text-white uppercase">Hackathon Rules</h2>
               </div>
-              <ul className="space-y-6">
+              <ul className="space-y-5 md:space-y-6">
                 {HACKATHON_RULES.map((rule, i) => (
                   <li key={i} className="flex gap-4 items-start">
                     <div className="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0" />
-                    <p className="text-sm sm:text-base text-zinc-400 font-medium leading-relaxed">{rule}</p>
+                    <p className="text-xs sm:text-base text-zinc-400 font-medium leading-relaxed">{rule}</p>
                   </li>
                 ))}
               </ul>
             </LiquidGlassCard>
-            <div className="space-y-8">
-              <LiquidGlassCard className="p-8 rounded-[2.5rem]">
-                <h3 className="font-phonk text-xl text-white uppercase mb-6">Tools & Resources</h3>
-                <p className="text-zinc-400 mb-6 font-medium">Participants must bring their own laptops. The following are permitted:</p>
-                <div className="flex flex-wrap gap-3">
+            <div className="space-y-6 md:space-y-8">
+              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
+                <h3 className="font-phonk text-lg md:text-xl text-white uppercase mb-4 md:mb-6">Tools & Resources</h3>
+                <p className="text-xs md:text-sm text-zinc-400 mb-6 font-medium">Participants must bring their own laptops. The following are permitted:</p>
+                <div className="flex flex-wrap gap-2 md:gap-3">
                   {['GenAI Tools', 'External APIs', 'Open-source Libraries'].map((tag, i) => (
-                    <span key={i} className="px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-base font-bold">{tag}</span>
+                    <span key={i} className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] md:text-sm font-bold">{tag}</span>
                   ))}
                 </div>
-                <p className="mt-8 text-[14px] text-zinc-600 italic">Internet access will be provided (subject to availability).</p>
+                <p className="mt-6 md:mt-8 text-[11px] md:text-[14px] text-zinc-600 italic">Internet access will be provided (subject to availability).</p>
               </LiquidGlassCard>
-              <LiquidGlassCard className="p-8 rounded-[2.5rem]">
-                <h3 className="font-phonk text-xl text-white uppercase mb-6">Certificates & Recognition</h3>
-                <ul className="space-y-3 text-sm text-zinc-400 font-medium">
+              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
+                <h3 className="font-phonk text-lg md:text-xl text-white uppercase mb-4 md:mb-6">Certificates & Recognition</h3>
+                <ul className="space-y-3 text-xs md:text-sm text-zinc-400 font-medium">
                   <li className="flex items-center gap-3"><Award size={16} className="text-amber-500" /> Certificates of participation for all eligible participants</li>
                   <li className="flex items-center gap-3"><Trophy size={16} className="text-amber-500" /> Certificates of merit for shortlisted and winning teams</li>
                   <li className="flex items-center gap-3"><Gift size={16} className="text-amber-500" /> Prizes and recognition will be awarded to winners</li>
@@ -495,65 +562,68 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.section id="judging" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 bg-white/[0.01] rounded-[4rem] font-jakarta">
-          <div className="mb-16 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-7xl font-phonk text-white uppercase mb-4">Judging Criteria</h2>
+        <motion.section id="judging" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24 md:bg-white/[0.01] md:rounded-[4rem] font-jakarta">
+          <div className="mb-12 md:mb-16 flex flex-col items-center text-center">
+            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Judging Criteria</h2>
             <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {JUDGING_CRITERIA.map((item, i) => (
-              <LiquidGlassCard key={i} className="p-8 rounded-[2rem] hover:border-amber-500/20">
-                <h4 className="font-phonk text-base text-white uppercase tracking-widest mb-4">{item.title}</h4>
-                <p className="text-base text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
+              <LiquidGlassCard key={i} className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] hover:border-amber-500/20">
+                <h4 className="font-phonk text-[10px] md:text-base text-white uppercase tracking-widest mb-3 md:mb-4">{item.title}</h4>
+                <p className="text-xs md:text-base text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
               </LiquidGlassCard>
             ))}
           </div>
         </motion.section>
 
-        <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 font-jakarta">
+        <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24 font-jakarta">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-            <LiquidGlassCard className="relative rounded-[4rem] p-12 sm:p-24 text-center overflow-hidden">
-              <h2 className="text-2xl sm:text-7xl font-phonk text-white uppercase mb-10 leading-tight">Registration</h2>
-              <div className="flex flex-col items-center gap-8 mb-16">
-                 <p className="text-zinc-400 max-w-2xl mx-auto text-sm sm:text-lg tracking-wide font-medium leading-relaxed">
+            <LiquidGlassCard className="relative rounded-[2rem] md:rounded-[4rem] p-8 sm:p-12 md:p-24 text-center overflow-hidden transform-gpu">
+              <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-6 md:mb-10 leading-tight">Registration</h2>
+              <div className="flex flex-col items-center gap-6 md:gap-8 mb-10 md:mb-16">
+                 <p className="text-zinc-400 max-w-2xl mx-auto text-xs sm:text-lg tracking-wide font-medium leading-relaxed">
                   Sync complete. Finalize via Unstop. Secure your unit's access to the singularity today. Teams are encouraged to regularly check registered email and Unstop for updates.
                 </p>
-                <div className="flex flex-wrap justify-center gap-10 text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                  <span className="flex items-center gap-2"><Utensils size={16} className="text-amber-500" /> Food Provided</span>
-                  <span className="flex items-center gap-2"><Camera size={16} className="text-amber-500" /> Media Coverage Permitted</span>
-                  <span className="flex items-center gap-2"><Globe size={16} className="text-amber-500" /> Inter-college Allowed</span>
+                <div className="flex flex-wrap justify-center gap-4 md:gap-10 text-[9px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest">
+                  <span className="flex items-center gap-2"><Utensils size={14} className="text-amber-500" /> Food Provided</span>
+                  <span className="flex items-center gap-2"><Camera size={14} className="text-amber-500" /> Media Coverage Permitted</span>
+                  <span className="flex items-center gap-2"><Globe size={14} className="text-amber-500" /> Inter-college Allowed</span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 relative z-10">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 relative z-10">
                 <motion.a 
                   href="#" target="_blank" 
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-12 py-6 bg-white text-black font-phonk text-[10px] sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl"
+                  className="w-full sm:w-auto px-10 py-5 md:px-12 md:py-6 bg-white text-black font-phonk text-[9px] md:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl"
                 >
-                  UNSTOP PORTAL <ExternalLink size={16} />
+                  UNSTOP PORTAL <ExternalLink size={14} />
                 </motion.a>
-                <div className="text-center sm:text-left"><p className="text-white text-base sm:text-2xl font-extrabold tracking-wide uppercase">FEE: ₹350</p><p className="text-zinc-500 text-[13px] italic font-semibold">100% refund for Round 1 non-shortlist</p></div>
+                <div className="text-center sm:text-left">
+                  <p className="text-white text-base md:text-2xl font-extrabold tracking-wide uppercase">FEE: ₹350</p>
+                  <p className="text-zinc-500 text-[10px] md:text-[13px] italic font-semibold">100% refund for Round 1 non-shortlist</p>
+                </div>
               </div>
             </LiquidGlassCard>
           </motion.div>
         </motion.section>
 
-        <motion.section id="coordinators" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-24 text-center font-jakarta">
-          <div className="mb-16 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-7xl font-phonk text-white uppercase mb-4">Coordinators</h2>
+        <motion.section id="coordinators" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-16 md:py-24 text-center font-jakarta">
+          <div className="mb-12 md:mb-16 flex flex-col items-center text-center">
+            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Coordinators</h2>
             <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
             {COORDINATORS.map((person, i) => (
-              <motion.div key={i} whileHover={{ y: -10 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="group">
-                <LiquidGlassCard className="p-12 rounded-[3rem]">
-                  <div className="relative w-32 h-32 sm:w-56 sm:h-56 mx-auto mb-8 overflow-hidden rounded-full">
+              <motion.div key={i} whileHover={{ y: -8 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="group">
+                <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
+                  <div className="relative w-28 h-28 sm:w-48 md:w-56 sm:h-48 md:h-56 mx-auto mb-6 md:mb-8 overflow-hidden rounded-full">
                     <img src={person.image} alt={person.name} className="w-full h-full object-cover border-4 border-white/10 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 shadow-2xl" />
                   </div>
-                  <h4 className="font-phonk text-lg sm:text-2xl text-white uppercase mb-2 tracking-widest">{person.name}</h4>
-                  <p className="text-[10px] sm:text-xs text-amber-500 font-bold uppercase tracking-[0.3em] mb-8">{person.role}</p>
-                  <a href={person.linkedin} className="inline-block p-4 rounded-full bg-white/5 border border-white/10 hover:bg-amber-600/20 transition-all active:scale-90">
-                    <Linkedin size={20} className="text-amber-500" />
+                  <h4 className="font-phonk text-base md:text-2xl text-white uppercase mb-2 tracking-widest">{person.name}</h4>
+                  <p className="text-[9px] md:text-xs text-amber-500 font-bold uppercase tracking-[0.3em] mb-6 md:mb-8">{person.role}</p>
+                  <a href={person.linkedin} className="inline-block p-3 md:p-4 rounded-full bg-white/5 border border-white/10 hover:bg-amber-600/20 transition-all active:scale-90">
+                    <Linkedin className="text-amber-500 w-[18px] md:w-[20px] h-[18px] md:h-[20px]" />
                   </a>
                 </LiquidGlassCard>
               </motion.div>
@@ -562,16 +632,16 @@ const App = () => {
         </motion.section>
       </main>
 
-      <footer className="py-24 text-center border-t border-white/5 bg-black/80 backdrop-blur-md font-jakarta">
-        <h2 className="font-phonk text-3xl sm:text-7xl text-white uppercase opacity-15 tracking-[0.6em] mb-12 select-none pointer-events-none">PARADOX</h2>
-        <div className="flex justify-center gap-10 mb-12 opacity-60">
+      <footer className="py-16 md:py-24 text-center border-t border-white/5 bg-black/80 backdrop-blur-md font-jakarta">
+        <h2 className="font-phonk text-2xl sm:text-5xl md:text-7xl text-white uppercase opacity-15 tracking-[0.4em] md:tracking-[0.6em] mb-8 md:mb-12 select-none pointer-events-none">PARADOX</h2>
+        <div className="flex justify-center gap-6 md:gap-10 mb-8 md:mb-12 opacity-60">
           {[Instagram, Twitter, Linkedin].map((Icon, i) => (
             <a key={i} href="#" className="text-white hover:text-amber-500 transition-all active:scale-75">
-              <Icon size={24} />
+              <Icon className="w-5 md:w-6 h-5 md:h-6" />
             </a>
           ))}
         </div>
-        <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.6em] opacity-60 px-4">SIESGST ACM CHAPTER // 2026 </p>
+        <p className="text-zinc-500 text-[8px] md:text-[10px] uppercase font-bold tracking-[0.4em] md:tracking-[0.6em] opacity-60 px-4">SIESGST ACM CHAPTER // 2026 </p>
       </footer>
 
       <style>{`
@@ -584,7 +654,11 @@ const App = () => {
         }
         html { 
           scroll-behavior: smooth; 
-          scroll-padding-top: 120px; 
+          scroll-padding-top: 100px; 
+          overflow-y: scroll;
+        }
+        @media (max-width: 768px) {
+          html { scroll-padding-top: 80px; }
         }
         body { 
           background-color: #02040a; 
@@ -593,6 +667,7 @@ const App = () => {
           margin: 0; 
           font-family: var(--font-jakarta); 
           -webkit-font-smoothing: antialiased; 
+          text-rendering: optimizeLegibility;
         }
         .font-phonk { font-family: var(--font-phonk); letter-spacing: -0.04em; }
         .font-keania { font-family: var(--font-keania); }
@@ -602,25 +677,30 @@ const App = () => {
         .grain-texture { 
           background-image: url('https://grainy-gradients.vercel.app/noise.svg'); 
           filter: contrast(180%) brightness(120%); 
-          position: fixed; inset: 0; opacity: 0.02; 
+          position: fixed; inset: 0; opacity: 0.015; 
         }
-        @keyframes slow-pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.05); } }
-        .animate-slow-pulse { animation: slow-pulse 8s ease-in-out infinite; }
+        @keyframes slow-pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.45; transform: scale(1.03); } }
+        .animate-slow-pulse { animation: slow-pulse 10s ease-in-out infinite; }
         
         .liquid-glass-effect {
           --mouse-x: 50%;
           --mouse-y: 50%;
           position: relative;
-          will-change: background;
+          will-change: transform, background;
         }
         .liquid-glass-effect:hover {
-          background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.01) 100%) !important;
+          background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.01) 100%) !important;
         }
 
         ::selection { background: rgba(217, 119, 6, 0.4); }
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #02040a; }
         ::-webkit-scrollbar-thumb { background: #1a1c2e; border-radius: 10px; }
+
+        .transform-gpu {
+          transform: translateZ(0);
+          backface-visibility: hidden;
+        }
       `}</style>
     </div>
   )
