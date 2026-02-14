@@ -5,62 +5,69 @@ import {
   Menu, X as XIcon, ChevronDown, Fingerprint, Layers, Terminal, Mail, User, Users, Phone,
   Building2, UserPlus, Twitter, Info, MapPin, Calendar, CreditCard, ExternalLink, AlertTriangle,
   Lightbulb, Code, Target, MessageSquare, Monitor, FastForward, Award, CheckCircle2,
-  Cpu as CpuIcon, Sparkles, Coins
+  Cpu as CpuIcon, Sparkles, Coins, Users2, GraduationCap, Laptop, Utensils, Search, Boxes, ClipboardCheck
 } from 'lucide-react'
-import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion'
 
 // --- Data Constants ---
 const EVENT_PHASES = {
   phase1: {
-    id: 'PHASE_01',
-    title: 'Digital Architecture',
+    id: 'ROUND_01',
+    title: 'Idea Submission',
     subtitle: 'ONLINE SCREENING',
-    description: 'Units must submit a comprehensive Agentic AI proposal. We are looking for architects who can define clear autonomous logic and feasible innovation.',
-    evaluation: ['Innovation', 'Technical Depth', 'Feasibility', 'Potential Impact'],
+    description: 'Submit an original proposal detailing the problem statement, proposed solution, and Agentic AI implementation. ZERO RISK: Teams not cleared for Round 02 receive a guaranteed 100% registration fee refund.',
+    evaluation: ['Innovation', 'Feasibility', 'Technical Depth', 'Relevance', 'Impact'],
     steps: [
-      { time: 'Entry', label: 'Proposal Upload', desc: 'Portal open for technical submissions.' },
-      { time: 'Sync', label: 'Manifest Reveal', desc: 'Top 40 units cleared for onsite synchronization.' }
+      { label: 'Manifest Upload', desc: 'Submit via Unstop portal.' },
+      { label: 'Evaluation', desc: 'Screening for technical merit.' }
     ]
   },
   phase2: {
-    id: 'PHASE_02',
-    title: 'The Singularity Sprint',
-    subtitle: 'ONSITE SYNCHRONIZATION',
-    description: 'A 10-hour high-pressure sprint at SIESGST. Convert your architecture into a functional autonomous MVP to solve the revealed paradox.',
-    features: ['10-Hour "Zero-Hour" Sprint', 'Direct Expert Debugging/Mentorship', 'High Council Demonstration'],
+    id: 'ROUND_02',
+    title: 'Offline Hackathon',
+    subtitle: 'ONSITE MVP DEVELOPMENT',
+    description: 'Top 40 shortlisted teams participate onsite at SIESGST. Problem statement revealed on the spot. 6–7 hours of continuous coding to build and present a functional MVP.',
+    features: ['10-Hour Total Duration', 'Live Evaluation', 'On-site Mentorship'],
     schedule: [
-      { time: '09:00 AM', label: 'Unit Arrival', desc: 'Hardware sync & verification.' },
-      { time: '10:00 AM', label: 'Zero-Hour', desc: 'Challenge Unveiled. Coding starts.' },
-      { time: '05:00 PM', label: 'Demo Sequence', desc: 'Final demonstration to judges.' }
+      { time: 'TBD', label: 'Check-in', desc: 'Verify identity & hardware.' },
+      { time: 'TBD', label: 'Zero-Hour', desc: 'Problem reveal & sync start.' },
+      { time: 'TBD', label: 'Final Demo', desc: 'Present MVP to judges.' }
     ]
   }
 }
+
+const ELIGIBILITY = [
+  { icon: GraduationCap, title: 'UG Students', desc: 'B.Tech / B.E., B.Sc. (CS/IT/related), and BCA. Valid College ID is mandatory.' },
+  { icon: Users2, title: 'Team Formation', desc: '3 to 4 members. Inter-college, inter-branch, and inter-specialization teams allowed.' },
+  { icon: Laptop, title: 'Resources', desc: 'Bring your own laptops. GenAI, external APIs, and open-source libraries permitted.' }
+]
 
 const JUDGING_CRITERIA = [
   { title: 'Innovation & Creativity', desc: 'Novelty of the concept and use of Agentic AI.' },
   { title: 'Technical Implementation', desc: 'Complexity, code quality, and logic of the solution.' },
   { title: 'Problem-Solving Approach', desc: 'Effectiveness of the solution to the problem statement.' },
-  { title: 'Presentation & Demonstration', desc: 'Clarity of thought and professionalism in pitching.' }
+  { title: 'Statement Relevance', desc: 'How well the solution addresses the revealed paradox.' },
+  { title: 'Presentation & Demo', desc: 'Clarity of thought and professionalism in pitching.' }
 ]
 
-const CODE_OF_CONDUCT = [
-  'No pre-built projects allowed. All code must be written during the event.',
+const HACKATHON_RULES = [
+  'Only original ideas allowed. Pre-built projects are strictly prohibited.',
   'Plagiarism or misrepresentation leads to immediate disqualification.',
-  'Unethical behavior or misconduct will not be tolerated.',
-  'Any damage to venue property will lead to direct disqualification.',
-  'GenAI tools and APIs are permitted for development support.'
+  'Teams must be present for the entire offline round; no-shows will be disqualified.',
+  'Malpractice during evaluation or presentation will not be tolerated.',
+  'Food will be provided during the offline hackathon.'
 ]
 
 const COORDINATORS = [
   {
-    name: 'Human1',
-    role: 'Coordinator 1',
+    name: 'Coordinator 1',
+    role: 'Lead Architect',
     linkedin: '#',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
   },
   {
-    name: 'Human2',
-    role: 'Coordinator 2',
+    name: 'Coordinator 2',
+    role: 'Operations Head',
     linkedin: '#',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
   }
@@ -79,8 +86,7 @@ const InteractiveFullViewportParticles = memo(() => {
     let animationFrameId;
 
     const particles = [];
-    // Increased count to fill the whole screen
-    const particleCount = 450; 
+    const particleCount = window.innerWidth < 768 ? 200 : 450; 
 
     class Particle {
       constructor(w, h) {
@@ -88,138 +94,113 @@ const InteractiveFullViewportParticles = memo(() => {
       }
 
       init(w, h) {
-        // Randomly arrange across the whole viewport
         this.baseX = Math.random() * w;
         this.baseY = Math.random() * h;
         this.x = this.baseX;
         this.y = this.baseY;
-        // Sharper, smaller size
-        this.size = Math.random() * 1.5 + 0.3;
-        // Increased brightness (higher alpha)
-        this.alpha = Math.random() * 0.8 + 0.2;
-        this.velocity = Math.random() * 0.5 + 0.1;
+        this.size = Math.random() * 1.6 + 0.2;
+        this.alpha = Math.random() * 0.7 + 0.2;
         this.angle = Math.random() * Math.PI * 2;
+        this.depthScale = (this.size / 1.8) * 2.0; 
+        this.ease = 0.04 + (Math.random() * 0.02);
       }
 
       update(mx, my, width, height) {
         if (!width || !height) return;
-
-        // Subtle drifting
-        this.angle += 0.01;
-        const driftX = Math.cos(this.angle) * 2;
-        const driftY = Math.sin(this.angle) * 2;
-
-        // Opposite force movement
+        this.angle += 0.004;
+        const driftX = Math.cos(this.angle) * 0.8;
+        const driftY = Math.sin(this.angle) * 0.8;
         const centerX = width / 2;
         const centerY = height / 2;
         
-        // Intensity of the "anti-gravity" push
-        const pushFactor = 150;
+        const pushFactor = 150 * this.depthScale;
         const mouseOffsetX = (mx - centerX) / width;
         const mouseOffsetY = (my - centerY) / height;
 
-        const targetX = this.baseX + (mouseOffsetX * -pushFactor) + driftX;
-        const targetY = this.baseY + (mouseOffsetY * -pushFactor) + driftY;
+        const targetX = this.baseX - (mouseOffsetX * pushFactor) + driftX;
+        const targetY = this.baseY - (mouseOffsetY * pushFactor) + driftY;
 
-        // Smooth physics-like movement
-        this.x += (targetX - this.x) * 0.04;
-        this.y += (targetY - this.y) * 0.04;
-
-        if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) {
-          this.init(width, height);
-        }
+        this.x += (targetX - this.x) * this.ease;
+        this.y += (targetY - this.y) * this.ease;
       }
 
       draw(context) {
-        if (!Number.isFinite(this.x) || !Number.isFinite(this.y)) return;
-        
         context.beginPath();
         context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        // Pure bright white
         context.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-        // Optional subtle glow for brightness pop without losing sharpness
-        context.shadowBlur = 4;
-        context.shadowColor = 'white';
+        if (this.depthScale > 1.4) {
+          context.shadowBlur = 10 * this.depthScale;
+          context.shadowColor = 'rgba(255, 255, 255, 0.3)';
+        }
         context.fill();
         context.shadowBlur = 0;
       }
     }
 
     const init = () => {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
       particles.length = 0;
       for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle(canvas.width, canvas.height));
-      }
-    };
-
-    const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      if (w > 0 && h > 0) {
-        canvas.width = w;
-        canvas.height = h;
-        init();
+        particles.push(new Particle(window.innerWidth, window.innerHeight));
       }
     };
 
     const animate = () => {
-      if (canvas.width === 0 || canvas.height === 0) {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       particles.forEach(p => {
-        p.update(mouseRef.current.x, mouseRef.current.y, canvas.width, canvas.height);
+        p.update(mouseRef.current.x, mouseRef.current.y, window.innerWidth, window.innerHeight);
         p.draw(ctx);
       });
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', resize);
-    const handleMouseMove = (e) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
+    const handleInput = (e) => {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      mouseRef.current = { x: clientX, y: clientY, active: true };
     };
-    window.addEventListener('mousemove', handleMouseMove);
 
-    resize();
+    window.addEventListener('resize', init);
+    window.addEventListener('mousemove', handleInput);
+    window.addEventListener('touchmove', handleInput, { passive: true });
+    init();
     animate();
-
     return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', init);
+      window.removeEventListener('mousemove', handleInput);
+      window.removeEventListener('touchmove', handleInput);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none w-full h-full" />;
 });
 
 const SingularityCore = memo(({ scrollYProgress }) => {
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 40, damping: 25, mass: 0.5 })
-  const scale = useTransform(smoothProgress, [0, 0.45, 1], [0.8, 1.1, 2.2])
-  const opacity = useTransform(smoothProgress, [0, 0.5, 1], [1, 0.7, 0.3])
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 30, mass: 1 })
+  const scale = useTransform(smoothProgress, [0, 0.45, 1], [0.8, 1.1, 2.8])
+  const opacity = useTransform(smoothProgress, [0, 0.1, 0.9, 1], [1, 1, 1, 1])
+  
+  // SWIPE EFFECT: Horizontal movement tracked with scroll
+  const x = useTransform(smoothProgress, [0, 0.5, 1], ["-10%", "0%", "10%"])
+  const rotate = useTransform(smoothProgress, [0, 1], [0, 15])
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transform-gpu">
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#0a0c1f_0%,#02040a_100%)]" />
-      
-      {/* Full Viewport White Particles */}
+      <div className="absolute inset-0 bg-[#02040a]" />
       <InteractiveFullViewportParticles />
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_50%_50%,rgba(16,24,48,0.4)_0%,transparent_70%)]" />
       
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(16,24,48,0.4)_0%,transparent_70%)]" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250vw] h-[1px] bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_40%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.1)_60%,transparent_100%)] blur-[3px] opacity-15" />
-      
-      <motion.div style={{ scale, opacity }} className="absolute inset-0 flex items-center justify-center will-change-transform origin-center z-10">
+      <motion.div 
+        style={{ scale, opacity, x, rotate }} 
+        className="absolute inset-0 flex items-center justify-center will-change-transform origin-center z-10"
+      >
         <div className="relative flex items-center justify-center">
-          <div className="absolute w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.15)_0%,rgba(245,158,11,0.05)_40%,transparent_70%)] blur-3xl animate-pulse" />
-          <div className="absolute w-[185px] h-[185px] sm:w-[355px] sm:h-[355px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,rgba(198,163,85,0.05)_40%,transparent_75%)] blur-3xl animate-pulse" />
-          <div className="absolute w-[190px] h-[190px] sm:w-[380px] sm:h-[380px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.05)_40%,transparent_60%)] blur-3xl z-40 animate-pulse mix-blend-screen" />
-          <div className="absolute rounded-full border-[1px] border-white/20 w-[161px] h-[161px] sm:w-[322px] sm:h-[322px] z-[55] shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
-          <div className="w-[160px] h-[160px] sm:w-[320px] sm:h-[320px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0d1117_0%,#02040a_100%)] z-50 relative overflow-hidden shadow-[inset_-10px_-10px_20px_rgba(255,255,255,0.02),0_4px_100px_rgba(245,158,11,0.5)]">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-50" />
-          </div>
+          <div className="absolute w-[45vw] h-[45vw] max-w-[450px] max-h-[450px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.12)_0%,transparent_70%)] blur-3xl animate-pulse" />
+          <div className="w-[30vw] h-[30vw] max-w-[320px] max-h-[320px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#0a0d17_0%,#000000_100%)] z-50 relative border border-white/5 shadow-[0_0_100px_rgba(245,158,11,0.15)]" />
         </div>
       </motion.div>
     </div>
@@ -254,52 +235,80 @@ const CountdownTimer = memo(({ targetDate }) => {
   ];
 
   return (
-    <div className="flex items-center justify-center flex-wrap gap-6 sm:gap-14 font-outfit text-4xl sm:text-7xl font-bold text-white tracking-tighter tabular-nums">
+    <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-8 md:gap-10 font-phonk text-2xl sm:text-5xl md:text-7xl text-white tracking-tighter tabular-nums">
       {items.map((item, idx) => (
         <div key={idx} className="flex flex-col items-center">
-          <div>{item.v.toString().padStart(2, '0')}</div>
-          <span className="text-[12px] sm:text-sm text-zinc-500 font-century uppercase tracking-[0.3em] mt-2 font-bold">{item.l}</span>
+          <div className="leading-none">{item.v.toString().padStart(2, '0')}</div>
+          <span className="font-sf text-[8px] sm:text-[10px] text-zinc-500 uppercase tracking-[0.2em] mt-2 sm:mt-3">{item.l}</span>
         </div>
       ))}
     </div>
   )
 })
 
-const FancyPrizeBadge = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.2 }}
-    className="relative group mt-12 mb-10 w-full max-w-sm sm:max-w-md mx-auto"
-  >
-    <div className="absolute -inset-2 bg-gradient-to-r from-amber-500/0 via-amber-500/20 to-amber-500/0 rounded-[2.5rem] blur-2xl group-hover:via-amber-500/40 transition-all duration-700" />
-    <div className="relative overflow-hidden px-8 py-8 sm:px-12 sm:py-10 bg-black/60 border border-white/10 backdrop-blur-2xl rounded-[2rem] shadow-2xl flex flex-col items-center gap-4">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
-      </div>
-      <div className="flex items-center gap-3 mb-1">
-        <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-amber-500/50" />
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-          <Sparkles size={12} className="text-amber-500 animate-pulse" />
-          <span className="text-[9px] sm:text-[11px] font-black font-century tracking-[0.4em] text-amber-500 uppercase leading-none">REWARD POOL</span>
+const PrizePoolCard = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useTransform(mouseY, [-100, 100], [12, -12]);
+  const rotateY = useTransform(mouseX, [-100, 100], [-12, 12]);
+  
+  const springConfig = { damping: 25, stiffness: 200 };
+  const sprRotateX = useSpring(rotateX, springConfig);
+  const sprRotateY = useSpring(rotateY, springConfig);
+
+  const shineX = useTransform(mouseX, [-100, 100], ["0%", "100%"]);
+  const shineY = useTransform(mouseY, [-100, 100], ["0%", "100%"]);
+
+  function handleMouseMove(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    mouseX.set(((x / width) - 0.5) * 200);
+    mouseY.set(((y / height) - 0.5) * 200);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0);
+    mouseY.set(0);
+  }
+
+  return (
+    <motion.div 
+      initial={{ scale: 0.9, opacity: 0 }}
+      whileInView={{ scale: 1, opacity: 1 }}
+      className="relative flex flex-col items-center my-12"
+      style={{ perspective: 1000 }}
+    >
+      <motion.div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ 
+          rotateX: sprRotateX, 
+          rotateY: sprRotateY,
+          transformStyle: "preserve-3d" 
+        }}
+        className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-[4/5] bg-white/[0.03] backdrop-blur-2xl rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center p-10 overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] group transition-all duration-300 hover:border-amber-500/40"
+      >
+        <motion.div 
+          style={{ left: shineX, top: shineY }}
+          className="absolute w-64 h-64 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-1/2 -translate-y-1/2" 
+        />
+        <div style={{ transform: "translateZ(50px)" }} className="flex flex-col items-center">
+          <h2 className="font-keania text-5xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] text-center uppercase">
+            PRIZE<br/>POOL
+          </h2>
+          <div className="w-16 h-[2px] bg-amber-500/60 my-8 rounded-full" />
+          <p className="font-keania text-3xl sm:text-5xl text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors duration-500">
+            15000/- Rs
+          </p>
         </div>
-        <div className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-amber-500/50" />
-      </div>
-      <div className="relative">
-        <div className="absolute -inset-4 bg-amber-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span className="relative text-6xl sm:text-8xl font-black font-outfit text-white tracking-tighter block drop-shadow-lg">
-          ₹1,500<span className="text-amber-500 text-3xl sm:text-5xl ml-1">+</span>
-        </span>
-      </div>
-      <div className="flex flex-col items-center gap-1 font-jetbrains opacity-80 group-hover:opacity-100 transition-opacity">
-        <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-          <Coins size={14} className="text-amber-500" /> STAKED FOR EXCELLENCE
-        </p>
-        <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-2" />
-      </div>
-    </div>
-  </motion.div>
-)
+      </motion.div>
+    </motion.div>
+  )
+}
 
 const App = () => {
   const containerRef = useRef(null)
@@ -319,10 +328,10 @@ const App = () => {
 
   const navItems = [
     { label: 'Home', id: 'home' },
-    { label: 'Description', id: 'description' },
-    { label: 'Judging', id: 'judging' },
-    { label: 'Register', id: 'register' },
-    { label: 'Team', id: 'coordinators' }
+    { label: 'Event', id: 'description' },
+    { label: 'Rules', id: 'judging' },
+    { label: 'Registration', id: 'register' },
+    { label: 'Coordinators', id: 'coordinators' }
   ]
 
   useEffect(() => {
@@ -331,42 +340,46 @@ const App = () => {
       const current = sections.find(section => {
         if (!section) return false
         const rect = section.getBoundingClientRect()
-        return rect.top >= -200 && rect.top <= 200
+        return rect.top >= -300 && rect.top <= 300
       })
       if (current && current.id !== activeSection) setActiveSection(current.id)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [activeSection])
+  }, [activeSection, navItems])
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-[#02040a] text-zinc-300 selection:bg-amber-600/30 overflow-x-hidden font-jetbrains">
-      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture transform-gpu" />
+    <div ref={containerRef} className="relative min-h-screen bg-[#02040a] text-zinc-300 selection:bg-amber-600/30 overflow-x-hidden">
+      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture" />
       <SingularityCore scrollYProgress={scrollYProgress} />
 
-      <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-8 flex justify-center pointer-events-auto">
-        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative hidden md:flex items-center gap-1 p-1 bg-[#0a0c1f]/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-10 flex justify-center pointer-events-auto">
+        <motion.div 
+          initial={{ y: -50, opacity: 0 }} 
+          animate={{ y: 0, opacity: 1 }} 
+          className="relative hidden md:flex items-center gap-1 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl"
+        >
           {navItems.map((item) => (
-            <button key={item.id} onClick={() => scrollTo(item.id)} className={`relative px-6 py-3 rounded-full text-[13px] font-inter font-bold uppercase tracking-[0.2em] transition-colors duration-200 z-10 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}>
-              {activeSection === item.id && <motion.div layoutId="active-pill" transition={{ type: 'spring', bounce: 0.1, duration: 0.5 }} className="absolute inset-0 rounded-full bg-amber-600/80 shadow-[0_0_15px_rgba(198,163,85,0.3)] -z-10" />}
-              <span className="relative">{item.label}</span>
+            <button key={item.id} onClick={() => scrollTo(item.id)} className={`relative px-6 lg:px-8 py-3 rounded-full text-[10px] lg:text-[11px] font-phonk uppercase tracking-widest transition-all duration-300 z-10 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}>
+              {activeSection === item.id && <motion.div layoutId="active-pill" className="absolute inset-0 rounded-full bg-amber-600/90 -z-10 shadow-[0_0_15px_rgba(217,119,6,0.5)]" />}
+              {item.label}
             </button>
           ))}
         </motion.div>
 
-        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-6 py-4 bg-[#0a0c1f]/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl font-century">
-          <span className="text-sm font-bold tracking-[0.3em] text-amber-500 uppercase">Paradox '26</span>
+        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-5 py-4 bg-black/70 border border-white/10 rounded-full backdrop-blur-xl shadow-3xl">
+          <span className="text-[10px] font-phonk tracking-widest text-amber-500 uppercase">PARADOX</span>
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-white active:scale-90 transition-transform">
-            {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <XIcon size={18} /> : <Menu size={18} />}
           </button>
         </div>
 
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="md:hidden absolute top-24 left-4 right-4 bg-[#02040a] border border-white/10 rounded-3xl backdrop-blur-3xl p-6 shadow-3xl z-[120]">
-              <div className="flex flex-col gap-3">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="md:hidden absolute top-20 left-4 right-4 bg-black/95 border border-white/10 rounded-3xl backdrop-blur-3xl p-6 shadow-3xl z-[120]">
+              <div className="flex flex-col gap-2">
                 {navItems.map((item) => (
-                  <button key={item.id} onClick={() => scrollTo(item.id)} className={`text-left px-6 py-4 rounded-xl text-sm font-bold uppercase tracking-widest font-inter ${activeSection === item.id ? 'bg-amber-600/20 text-white' : 'text-zinc-500 hover:bg-white/5'}`}>{item.label}</button>
+                  <button key={item.id} onClick={() => scrollTo(item.id)} className={`text-left px-6 py-4 rounded-xl text-[10px] font-phonk uppercase tracking-widest transition-all ${activeSection === item.id ? 'bg-amber-600/20 text-amber-500 border border-amber-600/30' : 'text-zinc-500'}`}>{item.label}</button>
                 ))}
               </div>
             </motion.div>
@@ -375,232 +388,332 @@ const App = () => {
       </nav>
 
       <main className="relative z-10 w-full transform-gpu">
-        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-24 pb-16 relative">
-          <div className="flex flex-col items-center max-w-full w-full">
-            <span className="text-amber-500/80 tracking-[0.6em] text-sm sm:text-base font-bold uppercase mb-12 font-century">SIESGST ACM CHAPTER PRESENTS</span>
-            <div className="relative mb-14 w-full">
-              <h1 className="text-6xl sm:text-8xl md:text-[10rem] font-outfit font-black tracking-[0.15em] text-white uppercase leading-none">PARA<span className="text-amber-600">DOX</span></h1>
-              <p className="mt-12 text-zinc-400 text-base sm:text-xl font-bold tracking-[0.4em] uppercase font-jetbrains max-w-[90vw] mx-auto leading-relaxed">AN AI HACKATHON WHERE THE KNOWN ENDS</p>
+        {/* HOME SECTION */}
+        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-6 text-center pt-20 pb-8 sm:pb-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center w-full max-w-5xl">
+            <span className="font-sf text-amber-500/80 tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 sm:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
+            <div className="relative mb-8 sm:mb-10 w-full">
+              <h1 className="text-[clamp(2.5rem,12vw,11rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">
+                PARA<span className="text-amber-600">DOX</span>
+              </h1>
+              <p className="mt-4 sm:mt-6 font-sf text-zinc-400 text-xs sm:text-lg font-bold tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic">CERTAIN ONLY IN UNCERTAINTY</p>
             </div>
-            <div className="mb-8 px-10 py-16 rounded-[2.5rem] bg-white/5 backdrop-blur-md border border-white/10 w-full max-w-4xl shadow-3xl">
-              <p className="text-zinc-500 text-sm sm:text-base font-bold tracking-[0.5em] uppercase mb-12 font-century opacity-60 italic">"CERTAIN ONLY IN UNCERTAINTY"</p>
-              <CountdownTimer targetDate="2026-03-07T09:00:00" />
+            <div className="mb-2 px-4 sm:px-8 py-8 sm:py-10 rounded-[2rem] sm:rounded-[2.5rem] bg-white/5 backdrop-blur-md border border-white/10 w-full max-w-4xl">
+              <CountdownTimer targetDate="2026-03-05T09:00:00" />
             </div>
-            <FancyPrizeBadge />
-            <div className="flex flex-col items-center">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => scrollTo('register')} className="px-14 sm:px-24 py-6 bg-white text-black font-black uppercase tracking-[0.4em] rounded-full shadow-[0_20px_60px_rgba(255,255,255,0.15)] flex items-center gap-6 text-sm sm:text-base hover:bg-zinc-200 transition-all duration-500 font-inter">
-                REGISTRATION <Rocket size={20} />
-              </motion.button>
-            </div>
-          </div>
+            <PrizePoolCard />
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => scrollTo('register')} className="px-10 sm:px-20 py-5 bg-white text-black font-phonk uppercase tracking-[0.2em] rounded-full text-[10px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-[0_15px_40px_rgba(255,255,255,0.1)]">
+              Registration Process
+            </motion.button>
+          </motion.div>
         </section>
 
-        <section id="description" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-56">
-          <div className="mb-24 flex flex-col items-center text-center">
-            <div className="flex items-center gap-6 mb-8">
-              <div className="w-20 h-[2px] bg-amber-500/50" />
-              <span className="text-amber-500 font-bold tracking-[0.4em] text-sm sm:text-base uppercase font-century">Operational Intel</span>
-              <div className="w-20 h-[2px] bg-amber-500/50" />
-            </div>
-            <h2 className="text-5xl sm:text-8xl font-black text-white uppercase font-outfit tracking-tight leading-none">EVENT DESCRIPTION</h2>
+        {/* EVENT DESCRIPTION MASTER CARD */}
+        <section id="description" className="max-w-7xl mx-auto px-6 py-12 sm:py-24">
+          <div className="mb-12 flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-7xl font-phonk text-white uppercase mb-4">Event Description</h2>
+            <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#0a0c1f]/40 border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
-              <div className="absolute top-0 right-0 p-10">
-                <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
-                  <CpuIcon className="text-amber-500" size={28} />
+
+          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[3rem] sm:rounded-[4rem] overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-white/10">
+              
+              {/* Sidebar: About & Logistics */}
+              <div className="lg:col-span-4 bg-black/40 p-8 sm:p-12 flex flex-col">
+                <div className="mb-12">
+                  <h3 className="font-phonk text-lg text-amber-500 uppercase tracking-widest mb-6">Master Protocol</h3>
+                  <p className="font-sf text-xs sm:text-sm text-zinc-300 leading-relaxed font-black tracking-wide">
+                    Paradox is an inter-collegiate Agentic AI Hackathon bringing together innovative minds to build intelligent, autonomous solutions. Creativity, problem-solving, and implementation using Agentic AI concepts are the core focus.
+                  </p>
                 </div>
-              </div>
-              <div className="mb-12">
-                <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase1.id}</p>
-                <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase1.title}</h3>
-                <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase1.subtitle}</p>
-              </div>
-              <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase1.description}</p>
-              <div className="space-y-8">
-                <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century opacity-50">Evaluation Metrics:</p>
-                <div className="grid grid-cols-2 gap-4">
-                  {EVENT_PHASES.phase1.evaluation.map((tag) => (
-                    <div key={tag} className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10 text-sm sm:text-base text-zinc-300 flex items-center gap-4 transition-all duration-300 hover:border-amber-500/50">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      {tag}
+                
+                <div className="mt-auto space-y-8">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2 text-white">
+                      <Calendar size={16} className="text-amber-500" />
+                      <span className="font-phonk text-[10px] tracking-widest">Date</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-16 pt-10 border-t border-white/5 font-jetbrains">
-                <div className="space-y-6">
-                  {EVENT_PHASES.phase1.steps.map((step, i) => (
-                    <div key={i} className="flex items-center justify-between group">
-                      <span className="text-xs sm:text-sm font-bold text-amber-500/60 uppercase tracking-widest">{step.time}</span>
-                      <span className="text-sm sm:text-base font-bold text-white group-hover:text-amber-500 transition-colors">{step.label}</span>
+                    <p className="font-sf text-sm font-black text-zinc-400 tracking-widest">5th March 2026</p>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-2 text-white">
+                      <MapPin size={16} className="text-amber-500" />
+                      <span className="font-phonk text-[10px] tracking-widest">Venue</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative group bg-[#0a0c1f]/40 border border-white/10 rounded-[3.5rem] p-10 sm:p-16 backdrop-blur-3xl shadow-3xl flex flex-col">
-              <div className="absolute top-0 right-0 p-10">
-                <div className="w-16 h-16 rounded-2xl bg-amber-600/10 flex items-center justify-center border border-amber-600/20 shadow-[0_0_20px_rgba(198,163,85,0.1)]">
-                  <Terminal className="text-amber-500" size={28} />
-                </div>
-              </div>
-              <div className="mb-12">
-                <p className="text-sm sm:text-base text-amber-500/60 font-bold uppercase tracking-[0.3em] font-jetbrains mb-3">{EVENT_PHASES.phase2.id}</p>
-                <h3 className="text-3xl sm:text-4xl font-black text-white font-outfit mb-3">{EVENT_PHASES.phase2.title}</h3>
-                <p className="text-base text-zinc-500 font-bold uppercase tracking-widest font-jetbrains opacity-80">{EVENT_PHASES.phase2.subtitle}</p>
-              </div>
-              <p className="text-zinc-400 text-base sm:text-xl leading-relaxed font-jetbrains mb-16 flex-grow">{EVENT_PHASES.phase2.description}</p>
-              <ul className="space-y-8 mb-16 font-jetbrains">
-                {EVENT_PHASES.phase2.features.map((feat, i) => (
-                  <li key={i} className="flex items-center gap-6 group">
-                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-amber-500/20 transition-all duration-500">
-                      <Zap className="text-amber-500" size={22} />
+                    <p className="font-sf text-sm font-black text-zinc-400 tracking-widest leading-relaxed">SIES Graduate School of Technology, Navi Mumbai</p>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3 mb-2 text-white">
+                      <Clock size={16} className="text-amber-500" />
+                      <span className="font-phonk text-[10px] tracking-widest">Total Time</span>
                     </div>
-                    <span className="text-zinc-300 text-base sm:text-xl leading-relaxed">{feat}</span>
+                    <p className="font-sf text-sm font-black text-zinc-400 tracking-widest">10 Hours Intensive</p>
+                  </div>
+                  <div className="p-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
+                    <div className="flex items-center gap-3 mb-2 text-amber-500">
+                      <CreditCard size={16} />
+                      <span className="font-phonk text-[10px] tracking-widest">Fee: 350RS</span>
+                    </div>
+                    <p className="font-sf text-[10px] sm:text-[10px] font-black text-amber-500 tracking-widest bold">
+                      100% CAPITAL RECOVERY: Guaranteed refund if not shortlisted for Round 2.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content: Format & Protocols */}
+              <div className="lg:col-span-8 bg-white/[0.01] p-8 sm:p-12 space-y-16">
+                
+                {/* Sync Format */}
+                <div>
+                  <h3 className="font-phonk text-xl text-white uppercase tracking-widest mb-10 border-l-4 border-amber-500 pl-6">Sync Stages</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center font-phonk text-xs text-amber-500">01</div>
+                        <h4 className="font-sf font-black text-sm text-white uppercase tracking-widest">Round 1: Idea Submission</h4>
+                      </div>
+                      <p className="font-sf text-[13px] text-zinc-500 font-black tracking-wider leading-relaxed">
+                        Teams submit an original proposal (Online). Ideas evaluated on Innovation, Feasibility, Depth, and Impact. Top 40 teams cleared for Round 2.
+                      </p>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center font-phonk text-xs text-amber-500">02</div>
+                        <h4 className="font-sf font-black text-sm text-white uppercase tracking-widest">Round 2: Offline Sprint</h4>
+                      </div>
+                      <p className="font-sf text-[11px] text-zinc-500 font-black tracking-wider leading-relaxed">
+                        6–7 hours of continuous onsite coding. Build and present a functional MVP for the paradox revealed on the event day.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Requirements Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-6">
+                    <h3 className="font-phonk text-[11px] text-white uppercase tracking-[0.3em] opacity-50 flex items-center gap-3">
+                      <GraduationCap size={16} /> Unit Requirements
+                    </h3>
+                    <ul className="space-y-3">
+                      {[
+                        'Open to all UG students.',
+                        'Eligible: B.Tech, B.E, B.Sc (CS/IT), BCA.',
+                        'Any college / department / branch permitted.',
+                        'Inter-college & inter-branch teams allowed.'
+                      ].map((item, i) => (
+                        <li key={i} className="flex gap-3 items-start">
+                          <div className="w-1 h-1 rounded-full bg-amber-500 mt-2 shrink-0" />
+                          <span className="font-sf text-[10px] text-zinc-400 font-black uppercase tracking-wider">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="space-y-6">
+                    <h3 className="font-phonk text-[11px] text-white uppercase tracking-[0.3em] opacity-50 flex items-center gap-3">
+                      <Users2 size={16} /> Team Formation
+                    </h3>
+                    <ul className="space-y-3">
+                      {[
+                        'Team size: 3 to 4 members.',
+                        'Participants limited to one team only.',
+                        'Team composition fixed upon registration.',
+                        'Valid college ID required for onsite round.'
+                      ].map((item, i) => (
+                        <li key={i} className="flex gap-3 items-start">
+                          <div className="w-1 h-1 rounded-full bg-amber-500 mt-2 shrink-0" />
+                          <span className="font-sf text-[10px] text-zinc-400 font-black uppercase tracking-wider">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Final Protocols Footer */}
+                <div className="pt-10 border-t border-white/5 grid grid-cols-2 sm:grid-cols-4 gap-6">
+                  <div className="space-y-2">
+                    <Laptop className="text-amber-500" size={20} />
+                    <p className="font-sf text-[9px] text-zinc-500 font-black uppercase tracking-widest leading-tight">OWN LAPTOPS<br/>MANDATORY</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Zap className="text-amber-500" size={20} />
+                    <p className="font-sf text-[9px] text-zinc-500 font-black uppercase tracking-widest leading-tight">GEN-AI & APIS<br/>PERMITTED</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Utensils className="text-amber-500" size={20} />
+                    <p className="font-sf text-[9px] text-zinc-500 font-black uppercase tracking-widest leading-tight">ONSITE FOOD<br/>PROVIDED</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Award className="text-amber-500" size={20} />
+                    <p className="font-sf text-[9px] text-zinc-500 font-black uppercase tracking-widest leading-tight">PARTICIPATION<br/>CERTIFICATES</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* CRITERIA & RULES SECTION */}
+        <section id="judging" className="max-w-7xl mx-auto px-6 py-12 sm:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20 items-start">
+            <div className="order-2 lg:order-1">
+              <h2 className="text-3xl sm:text-6xl font-phonk text-white uppercase mb-8 sm:mb-16 text-center lg:text-left">Judging Criteria</h2>
+              <div className="space-y-8 sm:space-y-14">
+                {JUDGING_CRITERIA.map((item, i) => (
+                  <div key={i} className="group">
+                    <div className="flex gap-6 sm:gap-10 items-start">
+                      <div className="w-1.5 h-16 sm:h-20 bg-amber-500/20 group-hover:bg-amber-600 transition-colors shrink-0" />
+                      <div>
+                        <h4 className="font-sf text-lg sm:text-2xl text-white uppercase mb-2 tracking-wide font-black">{item.title}</h4>
+                        <p className="font-sf text-xs sm:text-lg text-zinc-500 leading-relaxed font-black opacity-80">{item.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2 bg-[#0a0a0a] border border-white/5 rounded-[3rem] sm:rounded-[5rem] p-10 sm:p-24 shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.05),transparent_70%)]" />
+              <div className="flex flex-col items-center mb-12 sm:mb-16">
+                <AlertTriangle className="text-amber-500 mb-4" size={32} />
+                <h3 className="text-3xl sm:text-5xl font-phonk text-white uppercase tracking-tight text-center">Code of Conduct</h3>
+              </div>
+              <ul className="space-y-6 sm:space-y-8 relative z-10">
+                {HACKATHON_RULES.map((text, i) => (
+                  <li key={i} className="flex gap-4 items-start group/li">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0 group-hover/li:scale-125 transition-transform" />
+                    <p className="font-sf text-xs sm:text-lg text-zinc-400 leading-relaxed font-black">{text}</p>
                   </li>
                 ))}
               </ul>
-              <div className="bg-amber-600/5 rounded-[2.5rem] border border-amber-600/20 p-8 sm:p-12 font-jetbrains">
-                <p className="text-white text-sm sm:text-base font-bold uppercase tracking-widest font-century mb-10 opacity-50 flex items-center gap-4">
-                  <Clock size={16} /> Sync Sequence (March 7th):
-                </p>
-                <div className="space-y-10 relative">
-                  <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-amber-500/20" />
-                  {EVENT_PHASES.phase2.schedule.map((item, i) => (
-                    <div key={i} className="flex gap-8 relative z-10">
-                      <div className="w-4 h-4 rounded-full bg-amber-600 mt-1.5 shadow-[0_0_15px_rgba(198,163,85,0.6)] flex-shrink-0" />
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-4">
-                          <span className="text-[11px] font-bold text-amber-500 opacity-60">{item.time}</span>
-                          <span className="text-sm sm:text-base font-bold text-white uppercase tracking-wider font-century">{item.label}</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        <section id="judging" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-56">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 sm:gap-32 items-start">
-            <div className="space-y-16">
-              <h2 className="text-5xl sm:text-7xl font-black text-white font-outfit tracking-tight leading-none">Judging Criteria</h2>
-              <div className="space-y-12 font-jetbrains">
-                {JUDGING_CRITERIA.map((item, i) => (
-                  <div key={i} className="flex gap-8 group">
-                    <div className="w-1.5 h-16 bg-amber-600/30 group-hover:bg-amber-500 transition-all rounded-full" />
-                    <div className="space-y-2">
-                      <h4 className="text-xl sm:text-2xl font-bold text-white tracking-wide font-century">{item.title}</h4>
-                      <p className="text-zinc-400 text-base sm:text-lg leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 to-amber-900/20 rounded-[4rem] blur-2xl" />
-              <div className="relative bg-[#0a0c1f]/60 border border-white/10 rounded-[4rem] p-12 sm:p-20 backdrop-blur-3xl shadow-3xl font-jetbrains">
-                <div className="flex items-center gap-6 mb-12">
-                  <AlertTriangle className="text-amber-500" size={36} />
-                  <h3 className="text-4xl sm:text-5xl font-bold text-white font-outfit tracking-tight">Code of Conduct</h3>
-                </div>
-                <ul className="space-y-8">
-                  {CODE_OF_CONDUCT.map((text, i) => (
-                    <li key={i} className="flex gap-4 group">
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
-                      <p className="text-zinc-400 text-base sm:text-lg leading-relaxed font-medium tracking-wide">{text}</p>
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-16 p-6 border border-amber-500/20 bg-amber-500/5 rounded-2xl flex items-center justify-center gap-4">
+                <span className="font-sf text-[9px] sm:text-[11px] text-amber-500 uppercase tracking-[0.3em] font-black text-center">Protocol strictly enforced by High Council</span>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="register" className="max-w-7xl mx-auto px-6 sm:px-10 py-32 sm:py-60">
-          <div className="relative group overflow-hidden rounded-[3rem] sm:rounded-[5rem] p-12 sm:p-24 md:p-32 border border-white/10 bg-[#02040a]/80 backdrop-blur-3xl text-center shadow-3xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(198,163,85,0.05),transparent_70%)] opacity-40 pointer-events-none" />
-            <div className="relative z-10 flex flex-col items-center">
-              <h2 className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tight font-outfit mb-10 leading-tight">Ready to Build the Future?</h2>
-              <p className="text-zinc-400 max-w-4xl mx-auto text-base sm:text-xl font-medium leading-relaxed mb-20 font-jetbrains tracking-wide">Registration is exclusively via Unstop. Secure your spot today and stand a chance to win and showcase your talent at SIESGST.</p>
-              <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full">
-                <motion.a href="#" target="_blank" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="group flex items-center justify-center gap-4 px-12 py-6 sm:px-16 sm:py-7 bg-white text-black font-black uppercase tracking-[0.2em] rounded-full shadow-2xl hover:bg-amber-500 hover:text-white transition-all duration-300 text-sm sm:text-base font-bold font-inter">
-                  REGISTER ON UNSTOP <ExternalLink size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </motion.a>
-                <div className="flex flex-col items-center md:items-start opacity-70">
-                  <p className="text-zinc-300 text-base sm:text-lg font-bold tracking-[0.1em] font-century">Registration Fee: ₹350</p>
-                  <p className="text-zinc-500 text-sm font-medium tracking-[0.05em] italic font-inter">(Full refund if not shortlisted)</p>
-                </div>
+        {/* REGISTRATION SECTION */}
+        <section id="register" className="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative rounded-[2.5rem] sm:rounded-[4rem] p-10 sm:p-24 bg-white/5 border border-white/10 text-center overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-600/5 to-transparent pointer-events-none group-hover:opacity-40 transition-opacity" />
+            <h2 className="text-2xl sm:text-7xl font-phonk text-white uppercase mb-6 sm:mb-10 leading-tight">Registration</h2>
+            <div className="flex flex-col items-center gap-6 mb-12 sm:mb-16">
+               <p className="font-sf text-zinc-400 max-w-3xl mx-auto text-xs sm:text-lg tracking-[0.1em] uppercase px-4 font-black">
+                Sync complete. Finalize via Unstop. Secure your unit's access to the singularity today.
+              </p>
+              <div className="bg-amber-500/10 border border-amber-500/20 px-6 py-3 rounded-full flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="font-sf text-[10px] sm:text-xs text-amber-500 uppercase tracking-[0.2em] font-black">ZERO-RISK ENTRY: 100% CAPITAL RECOVERY GUARANTEED</span>
               </div>
             </div>
-          </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 relative z-10">
+              <motion.a 
+                href="#" 
+                target="_blank" 
+                whileHover={{ scale: 1.05 }} 
+                className="w-full sm:w-auto px-12 py-5 bg-white text-black font-phonk text-[10px] sm:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
+              >
+                UNSTOP PORTAL <ExternalLink size={16} />
+              </motion.a>
+              <div className="text-center sm:text-left font-sf">
+                <p className="text-white text-base sm:text-lg font-bold tracking-[0.2em] uppercase font-black">FEE: ₹350</p>
+                <p className="text-zinc-500 text-[8px] sm:text-[10px] tracking-widest italic uppercase mt-1 font-black">Registration exclusively through unstop</p>
+              </div>
+            </div>
+          </motion.div>
         </section>
 
-        <section id="coordinators" className="max-w-7xl mx-auto px-6 sm:px-10 pt-32 pb-10 sm:pt-56 sm:pb-20 text-center">
-          <h2 className="text-4xl sm:text-7xl md:text-9xl font-bold tracking-tighter text-white uppercase mb-40 font-outfit">COORDINATORS</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 sm:gap-20 max-w-5xl mx-auto">
+        {/* COORDINATORS SECTION */}
+        <section id="coordinators" className="max-w-7xl mx-auto px-6 py-12 text-center">
+          <h2 className="text-2xl sm:text-7xl font-phonk text-white uppercase mb-16 sm:mb-24 tracking-tighter">Coordinators</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto">
             {COORDINATORS.map((person, i) => (
-              <motion.div key={i} whileHover={{ y: -15 }} className="relative flex flex-col items-center p-16 sm:p-24 rounded-[4rem] border border-white/10 bg-[#0a0c1f]/40 group transition-all duration-700 backdrop-blur-3xl shadow-3xl overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:opacity-100 opacity-30 transition-opacity" />
-                <div className="relative mb-14 flex justify-center">
-                  <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 scale-110" />
-                  <div className="relative w-56 h-56 sm:w-72 sm:h-72 flex-shrink-0">
-                    <img src={person.image} alt={person.name} className="w-full h-full rounded-full object-cover border border-white/10 group-hover:border-amber-500/30 transition-all duration-700 shadow-xl grayscale group-hover:grayscale-0 z-10" />
-                  </div>
+              <motion.div 
+                key={i} 
+                whileHover={{ y: -10 }} 
+                className="p-8 sm:p-12 rounded-[2.5rem] sm:rounded-[4rem] border border-white/10 bg-white/5 backdrop-blur-3xl group transition-all"
+              >
+                <div className="relative w-32 h-32 sm:w-56 sm:h-56 mx-auto mb-8 sm:mb-10">
+                  <div className="absolute inset-0 bg-amber-600/10 rounded-full blur-2xl group-hover:scale-110 transition-transform opacity-0 group-hover:opacity-100" />
+                  <img src={person.image} alt={person.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500 shadow-xl relative z-10" />
                 </div>
-                <div className="text-center z-10 font-jetbrains">
-                  <h4 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-tighter mb-5 font-outfit">{person.name}</h4>
-                  <p className="text-base text-amber-500 font-bold uppercase tracking-[0.4em] mb-14 font-century">{person.role}</p>
-                  <a href={person.linkedin} target="_blank" className="flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 transition-all duration-300 hover:bg-amber-600/20 group shadow-lg">
-                    <Linkedin size={26} className="text-amber-500 transition-transform group-hover:scale-110" />
-                  </a>
-                </div>
+                <h4 className="font-phonk text-lg sm:text-2xl text-white uppercase mb-2 tracking-widest">{person.name}</h4>
+                <p className="font-sf text-[9px] sm:text-[11px] text-amber-500 font-bold uppercase tracking-[0.3em] mb-8 sm:mb-10">{person.role}</p>
+                <a href={person.linkedin} className="inline-block p-4 rounded-full bg-white/5 border border-white/10 hover:bg-amber-600/20 transition-all active:scale-90">
+                  <Linkedin size={18} className="text-amber-500" />
+                </a>
               </motion.div>
             ))}
           </div>
         </section>
       </main>
 
-      <footer className="pt-10 pb-32 sm:pt-20 sm:pb-56 text-center border-t border-white/5 bg-[#02040a] relative z-10 font-jetbrains">
-        <div className="flex flex-col items-center justify-center gap-16 mb-32">
-          <h2 className="font-bold tracking-[1.8em] sm:tracking-[2.5em] text-3xl sm:text-6xl text-white uppercase ml-[1.5em] font-outfit opacity-15 leading-none">PARADOX</h2>
-          <div className="flex justify-center items-center gap-14 sm:gap-24 opacity-30 hover:opacity-100 transition-opacity duration-700">
-            {[Instagram, Twitter, Linkedin].map((Icon, i) => (
-              <a key={i} href="#" className="text-white hover:text-amber-500 transition-all duration-500 hover:scale-125"><Icon size={36} /></a>
-            ))}
-          </div>
+      <footer className="py-12 sm:py-16 text-center border-t border-white/5 bg-black/80 backdrop-blur-md">
+        <h2 className="font-phonk text-3xl sm:text-6xl text-white uppercase opacity-5 tracking-[0.5em] mb-12 select-none">PARADOX</h2>
+        <div className="flex justify-center gap-10 sm:gap-14 mb-12 opacity-30">
+          {[Instagram, Twitter, Linkedin].map((Icon, i) => (
+            <a key={i} href="#" className="text-white hover:text-amber-500 transition-all active:scale-75"><Icon size={22} /></a>
+          ))}
         </div>
-        <p className="text-zinc-800 text-sm uppercase font-bold tracking-[1.2em] opacity-60 px-4 text-center leading-relaxed font-century">SIESGST ACM CHAPTER // 2026 // SYSTEM_SYNC</p>
+        <p className="font-sf text-zinc-800 text-[8px] sm:text-[10px] uppercase font-black tracking-[1em] px-4 opacity-50">SIESGST ACM CHAPTER // 2026 // SYNC_STABLE</p>
       </footer>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@700;800;900&family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Keania+One&family=Syncopate:wght@700&display=swap');
+        
         :root { 
-          --font-outfit: 'Outfit', sans-serif; 
-          --font-jetbrains: 'JetBrains Mono', monospace; 
-          --font-century: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; 
-          --font-inter: 'Inter', sans-serif; 
+          --font-phonk: 'Syncopate', sans-serif;
+          --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+          --font-keania: 'Keania One', cursive;
         }
-        body { background-color: #02040a; color: white; overflow-x: hidden; -webkit-font-smoothing: antialiased; margin: 0; font-family: var(--font-jetbrains); width: 100%; }
-        .font-outfit { font-family: var(--font-outfit); }
-        .font-jetbrains { font-family: var(--font-jetbrains); }
-        .font-century { font-family: var(--font-century); }
-        .font-inter { font-family: var(--font-inter); }
+
+        body { 
+          background-color: #02040a; 
+          color: white; 
+          overflow-x: hidden; 
+          -webkit-font-smoothing: antialiased; 
+          margin: 0; 
+          font-family: var(--font-sf); 
+        }
+
+        .font-phonk { font-family: var(--font-phonk); letter-spacing: -0.04em; }
+        .font-sf { font-family: var(--font-sf); font-weight: 700; letter-spacing: 0.04em; }
+        .font-keania { font-family: var(--font-keania); }
         
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .animate-shimmer { animation: shimmer 3s infinite linear; }
-        .grain-texture { background-image: url('https://grainy-gradients.vercel.app/noise.svg'); filter: contrast(180%) brightness(120%); pointer-events: none; }
+        .grain-texture { 
+          background-image: url('https://grainy-gradients.vercel.app/noise.svg'); 
+          filter: contrast(180%) brightness(120%); 
+          pointer-events: none; 
+          position: fixed;
+          inset: 0;
+          opacity: 0.02;
+        }
         
-        ::selection { background: rgba(198, 163, 85, 0.3); }
-        ::-webkit-scrollbar { width: 3px; }
+        ::selection { background: rgba(217, 119, 6, 0.4); }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #02040a; }
-        ::-webkit-scrollbar-thumb { background: #1a1c2e; }
+        ::-webkit-scrollbar-thumb { background: #1a1c2e; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d97706; }
+        
         html { scroll-behavior: smooth; }
         .shadow-3xl { box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.95); }
+        
+        canvas {
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+        }
+
+        @media (max-width: 640px) {
+          .font-phonk { letter-spacing: -0.02em; }
+        }
       `}</style>
     </div>
   )
