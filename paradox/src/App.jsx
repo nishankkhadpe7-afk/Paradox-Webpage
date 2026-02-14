@@ -8,13 +8,8 @@ import {
   Cpu as CpuIcon, Sparkles, Coins, Users2, GraduationCap, Laptop, Utensils, Search, Boxes, ClipboardCheck,
   FileText, ShieldAlert, Gift, Camera
 } from 'lucide-react'
-import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion'
-
-/**
- * NOTE: Using a placeholder for logo since local assets are unavailable in this environment.
- * The code is structured to use your 'logo' import logic.
- */
-import logo from './assets/image 4.png';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion';
+import logo from './assets/image4.png'
 
 // --- Data Constants ---
 const ELIGIBILITY = [
@@ -114,7 +109,7 @@ const InteractiveStars = memo(() => {
     const ctx = canvas.getContext('2d', { alpha: true });
     let animationFrameId;
     const particles = [];
-    const particleCount = window.innerWidth < 768 ? 80 : 200; 
+    const particleCount = window.innerWidth < 768 ? 60 : 200; 
 
     class Star {
       constructor(w, h) { this.init(w, h); }
@@ -293,14 +288,18 @@ const PrizePoolCard = () => {
   )
 }
 
+
 const NavLogo = ({ className = "" }) => (
-    <div className={`flex items-center gap-2 ${className}`}>
-        <img 
-            src={logo} 
-            alt="Paradox Logo" 
-            className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 object-contain brightness-110 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-        />
-        <span className="font-phonk text-[10px] sm:text-xs tracking-widest text-white hidden xs:inline-block">PARA<span className="text-amber-500">DOX</span></span>
+    <div className={`flex items-center justify-center h-full ${className}`}>
+      <img 
+        src={logo} 
+        alt="Paradox Logo" 
+        className="h-8 sm:h-10 md:h-12 w-auto object-contain brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+        onError={(e) => {
+          e.target.onerror = null; 
+          e.target.src = "https://via.placeholder.com/160x50/000000/FFFFFF?text=PARADOX";
+        }}
+      />
     </div>
 )
 
@@ -315,16 +314,14 @@ const App = () => {
     const element = document.getElementById(id)
     if (element) {
       isScrollingManually.current = true
-      setIsMobileMenuOpen(false) // Close menu on click
+      setIsMobileMenuOpen(false) 
       setActiveSection(id) 
       element.scrollIntoView({ behavior: 'smooth' });
-      // Release manual scroll lock after a delay
       setTimeout(() => { isScrollingManually.current = false }, 1000)
     }
   }, [])
 
   const navItems = useMemo(() => [
-    { label: 'Home', id: 'home' },
     { label: 'About', id: 'about' },
     { label: 'Rounds', id: 'rounds' },
     { label: 'Rules', id: 'rules' },
@@ -341,6 +338,7 @@ const App = () => {
       if (timeoutId) return;
       timeoutId = setTimeout(() => {
         const sections = navItems.map(item => document.getElementById(item.id))
+        sections.push(document.getElementById('home'))
         const scrollPosition = window.scrollY + 200;
         
         const current = sections.find(section => {
@@ -373,59 +371,65 @@ const App = () => {
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture" />
       <SingularityCore scrollYProgress={scrollYProgress} />
 
-      {/* --- Responsive Navbar --- */}
-      <nav className="fixed top-0 left-0 right-0 z-[110] p-4 sm:p-6 lg:p-8 flex justify-center items-center pointer-events-auto">
+      {/* --- Unified Navigation System --- */}
+      <nav className="fixed top-4 md:top-8 left-0 right-0 z-[110] px-4 sm:px-10 flex justify-center pointer-events-none">
         
-        {/* Desktop Container */}
-        <div className="hidden md:flex items-center gap-6">
-            <motion.div 
-                initial={{ opacity: 0, x: -20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                className="shrink-0"
-            >
+        {/* PC/Desktop Layout (Wide Pill - strictly based on image_3c8b48.png / Group 1) */}
+        <div className="hidden lg:flex items-center justify-between w-full max-w-7xl h-20 px-10 bg-black/50 border border-white/10 backdrop-blur-3xl rounded-full shadow-2xl pointer-events-auto">
+            {/* Vertically Centered Logo */}
+            <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full hover:opacity-80 transition-opacity">
                 <NavLogo />
-            </motion.div>
+            </button>
 
-            <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative flex items-center gap-1 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-full shadow-2xl transform-gpu">
+            {/* Links with Active & Hover Indicators */}
+            <div className="flex items-center gap-1">
                 {navItems.map((item) => (
                     <button 
                         key={item.id} 
                         onClick={() => scrollTo(item.id)} 
-                        className={`relative px-4 lg:px-5 py-2.5 rounded-full text-[9px] lg:text-[11px] font-inter font-bold uppercase tracking-widest transition-all duration-300 z-10 hover:bg-white/5 ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'}`}
+                        className={`relative px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}`}
                     >
-                        {activeSection === item.id && <motion.div layoutId="active-pill" className="absolute inset-0 rounded-full bg-amber-600/90 -z-10 shadow-[0_0_15px_rgba(217,119,6,0.5)]" transition={{ type: "spring", stiffness: 400, damping: 35 }} />}
+                        {activeSection === item.id && (
+                          <motion.div 
+                            layoutId="active-desktop-nav" 
+                            className="absolute inset-0 rounded-full bg-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.4)] -z-10" 
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }} 
+                          />
+                        )}
                         {item.label}
                     </button>
                 ))}
-            </motion.div>
+            </div>
         </div>
 
-        {/* Mobile Navbar Shell */}
-        <div className="md:hidden flex items-center justify-between w-full max-w-sm px-4 py-2.5 bg-black/60 border border-white/10 rounded-full backdrop-blur-xl shadow-2xl relative">
-          <NavLogo className="scale-90 origin-left" />
+        {/* Mobile/Tablet Layout (Compact Pill - strictly based on image_3ca570.png / Group 3) */}
+        <div className="lg:hidden flex items-center justify-between w-full max-w-2xl h-14 sm:h-16 px-6 bg-black/70 border border-white/10 rounded-full backdrop-blur-3xl shadow-2xl pointer-events-auto relative">
+          <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full">
+            <NavLogo className="scale-90" />
+          </button>
           
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-            className="p-2 text-white active:scale-90 transition-transform relative z-[130]"
+            className="p-2.5 text-white active:scale-90 transition-transform relative z-[130] flex items-center justify-center"
             aria-label="Toggle Menu"
           >
-            {isMobileMenuOpen ? <XIcon size={20} /> : <Menu size={20} />}
+            {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
           </button>
           
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div 
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="fixed top-[70px] left-4 right-4 bg-black/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 shadow-4xl flex flex-col gap-2 z-[125] overflow-hidden"
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 20, scale: 1 }}
+                exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                className="absolute top-full left-0 right-0 mt-4 bg-black/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-4xl flex flex-col gap-3 z-[125] overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 blur-3xl rounded-full" />
                 {navItems.map((item) => (
                   <button 
                     key={item.id} 
                     onClick={() => scrollTo(item.id)} 
-                    className={`w-full py-4 text-[10px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
+                    className={`w-full py-5 text-[11px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 relative z-10 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-xl shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
                   >
                     {activeSection === item.id && <Sparkles size={14} />}
                     {item.label}
@@ -438,15 +442,16 @@ const App = () => {
       </nav>
 
       <main className="relative z-10 w-full transform-gpu">
-        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-24 sm:pt-40 pb-8 sm:pb-12">
+        {/* --- Home Section --- */}
+        <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-6 sm:px-10 text-center pt-32 sm:pt-48 pb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="flex flex-col items-center w-full max-w-5xl">
-            <span className="font-phonk text-amber-500/80 tracking-[0.2em] md:tracking-[0.4em] text-[7px] sm:text-xs font-bold uppercase mb-4 md:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
-            <div className="relative mb-6 md:mb-10 w-full">
-              <h1 className="text-[clamp(2.2rem,12vw,11rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">PARA<span className="text-amber-600">DOX</span></h1>
-              <p className="mt-4 sm:mt-6 font-phonk text-zinc-400 text-[8px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80">CERTAIN ONLY IN UNCERTAINTY</p>
+            <span className="font-phonk text-amber-500/80 tracking-[0.2em] md:tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 md:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
+            <div className="relative mb-8 md:mb-12 w-full">
+              <h1 className="text-[clamp(2.5rem,14vw,12rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">PARA<span className="text-amber-600">DOX</span></h1>
+              <p className="mt-4 sm:mt-8 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80">CERTAIN ONLY IN UNCERTAINTY</p>
             </div>
             
-            <LiquidGlassCard className="mb-2 px-4 sm:px-8 py-6 sm:py-10 rounded-[1.5rem] sm:rounded-[2.5rem] w-full max-w-4xl">
+            <LiquidGlassCard className="mb-4 px-6 sm:px-10 py-8 sm:py-12 rounded-[2rem] sm:rounded-[3rem] w-full max-w-4xl">
               <CountdownTimer targetDate="2026-03-05T09:00:00" />
             </LiquidGlassCard>
 
@@ -455,41 +460,42 @@ const App = () => {
             <motion.button 
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} 
               onClick={() => scrollTo('register')} 
-              className="px-8 sm:px-20 py-4 sm:py-5 bg-white text-black font-phonk uppercase tracking-[0.15em] rounded-full text-[8px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-xl active:scale-95 touch-manipulation"
+              className="px-12 sm:px-24 py-5 sm:py-6 bg-white text-black font-phonk uppercase tracking-[0.2em] rounded-full text-[9px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-2xl active:scale-95 touch-manipulation mt-4"
             >
               Start Registration
             </motion.button>
           </motion.div>
         </section>
 
-        <motion.section id="about" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24">
-          <div className="mb-10 md:mb-16 flex flex-col items-center text-center">
-            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">The Paradox</h2>
-            <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
+        {/* --- About Section --- */}
+        <motion.section id="about" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32">
+          <div className="mb-12 md:mb-20 flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">The Paradox</h2>
+            <div className="w-20 sm:w-24 h-1.5 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
-            <div className="space-y-6 md:space-y-8 font-jakarta text-zinc-300 leading-relaxed font-medium">
-              <p className="text-base sm:text-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-start">
+            <div className="space-y-8 md:space-y-12 font-jakarta text-zinc-300 leading-relaxed font-medium">
+              <p className="text-lg sm:text-2xl">
                 Paradox is an inter-collegiate Agentic AI Hackathon designed to bring together innovative minds to build intelligent, autonomous AI-driven solutions. The hackathon encourages creativity, problem-solving, and hands-on implementation using Agentic AI concepts and modern technologies.
               </p>
-              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem]">
-                <p className="text-xs sm:text-sm text-zinc-400 font-semibold italic">
+              <LiquidGlassCard className="p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem]">
+                <p className="text-sm sm:text-lg text-zinc-400 font-semibold italic">
                   The problem statement will be declared on the hackathon day to ensure fairness and originality.
                 </p>
               </LiquidGlassCard>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-6 font-jakarta">
+            <div className="grid grid-cols-2 gap-4 sm:gap-8 font-jakarta">
               {[
                 { icon: Calendar, label: 'Date', val: '5 Mar 2026' },
                 { icon: MapPin, label: 'Venue', val: 'Navi Mumbai' },
                 { icon: Clock, label: 'Duration', val: '10 Hours' },
                 { icon: CreditCard, label: 'Fee', val: '₹350' }
               ].map((item, i) => (
-                <LiquidGlassCard key={i} className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col gap-2 sm:gap-4">
-                  <item.icon size={18} className="text-amber-500" />
+                <LiquidGlassCard key={i} className="p-6 sm:p-8 rounded-3xl flex flex-col gap-3 sm:gap-6">
+                  <item.icon size={24} className="text-amber-500" />
                   <div>
-                    <p className="font-phonk text-[8px] sm:text-[12px] text-zinc-500 uppercase tracking-widest mb-1">{item.label}</p>
-                    <p className="text-[10px] sm:text-sm font-bold text-white whitespace-nowrap">{item.val}</p>
+                    <p className="font-phonk text-[9px] sm:text-[13px] text-zinc-500 uppercase tracking-widest mb-1">{item.label}</p>
+                    <p className="text-xs sm:text-lg font-bold text-white whitespace-nowrap">{item.val}</p>
                   </div>
                 </LiquidGlassCard>
               ))}
@@ -497,32 +503,33 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.section id="eligibility" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24 md:bg-white/[0.01] md:rounded-[4rem]">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20">
+        {/* --- Eligibility & Teams --- */}
+        <motion.section id="eligibility" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 lg:bg-white/[0.01] lg:rounded-[5rem]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24">
             <div>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-phonk text-white uppercase mb-8 md:mb-12">Eligibility</h2>
-              <div className="space-y-6 md:space-y-10 font-jakarta">
+              <h2 className="text-3xl sm:text-5xl md:text-6xl font-phonk text-white uppercase mb-12 md:mb-16">Eligibility</h2>
+              <div className="space-y-8 md:space-y-12 font-jakarta">
                 {ELIGIBILITY.map((item, i) => (
-                  <div key={i} className="flex gap-4 md:gap-6 items-start">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <item.icon size={20} className="text-amber-500" />
+                  <div key={i} className="flex gap-6 md:gap-8 items-start">
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <item.icon size={24} className="text-amber-500" />
                     </div>
                     <div>
-                      <h4 className="font-phonk text-[10px] md:text-base text-white uppercase tracking-widest mb-2">{item.title}</h4>
-                      <p className="text-xs md:text-base text-zinc-500 leading-relaxed font-medium">{item.desc}</p>
+                      <h4 className="font-phonk text-xs md:text-lg text-white uppercase tracking-widest mb-3">{item.title}</h4>
+                      <p className="text-sm md:text-lg text-zinc-500 leading-relaxed font-medium">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-phonk text-white uppercase mb-8 md:mb-12">Teams</h2>
-              <LiquidGlassCard className="p-6 md:p-10 rounded-[1.5rem] md:rounded-[3rem]">
-                <ul className="space-y-4 md:space-y-6">
+              <h2 className="text-3xl sm:text-5xl md:text-6xl font-phonk text-white uppercase mb-12 md:mb-16">Teams</h2>
+              <LiquidGlassCard className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem]">
+                <ul className="space-y-6 md:space-y-8">
                   {TEAM_RULES.map((rule, i) => (
-                    <li key={i} className="flex gap-4 items-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                      <p className="text-xs sm:text-lg font-jakarta text-zinc-300 font-medium">{rule}</p>
+                    <li key={i} className="flex gap-6 items-center">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <p className="text-sm sm:text-xl font-jakarta text-zinc-300 font-medium">{rule}</p>
                     </li>
                   ))}
                 </ul>
@@ -531,125 +538,130 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.section id="rounds" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24 font-jakarta">
-          <div className="mb-10 md:mb-16 flex flex-col items-center text-center">
-            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Format</h2>
-            <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
+        {/* --- Rounds --- */}
+        <motion.section id="rounds" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 font-jakarta">
+          <div className="mb-12 md:mb-20 flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">Format</h2>
+            <div className="w-20 sm:w-24 h-1.5 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
             {ROUNDS.map((round, i) => (
-              <LiquidGlassCard key={i} className="group relative p-6 md:p-10 rounded-[1.5rem] md:rounded-[3rem] overflow-hidden hover:border-amber-500/30">
-                <div className="absolute top-0 right-0 p-6 md:p-8 font-phonk text-4xl md:text-6xl text-white/5 select-none">{round.id}</div>
-                <h3 className="font-phonk text-[10px] md:text-lg text-amber-500 uppercase tracking-widest mb-6 md:mb-8">{round.title}</h3>
-                <div className="space-y-4 md:space-y-6 relative z-10">
-                  <p className="text-xs md:text-base text-zinc-300 font-medium leading-relaxed">{round.desc}</p>
-                  <div className="p-4 md:p-6 rounded-2xl bg-white/5 border border-white/5 text-[10px] md:text-base text-zinc-400 italic">{round.eval}</div>
-                  <p className="text-[10px] md:text-sm text-amber-500 font-bold tracking-wide">{round.footer}</p>
+              <LiquidGlassCard key={i} className="group relative p-8 md:p-14 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden hover:border-amber-500/30">
+                <div className="absolute top-0 right-0 p-8 md:p-12 font-phonk text-5xl md:text-8xl text-white/5 select-none">{round.id}</div>
+                <h3 className="font-phonk text-[11px] md:text-xl text-amber-500 uppercase tracking-widest mb-8 md:mb-10">{round.title}</h3>
+                <div className="space-y-6 md:space-y-8 relative z-10">
+                  <p className="text-sm md:text-xl text-zinc-300 font-medium leading-relaxed">{round.desc}</p>
+                  <div className="p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/5 text-xs md:text-lg text-zinc-400 italic leading-relaxed">{round.eval}</div>
+                  <p className="text-xs md:text-base text-amber-500 font-bold tracking-widest">{round.footer}</p>
                 </div>
               </LiquidGlassCard>
             ))}
           </div>
         </motion.section>
 
-        <motion.section id="rules" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24 font-jakarta">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
-            <LiquidGlassCard className="p-6 md:p-10 rounded-[1.5rem] md:rounded-[3rem]">
-              <div className="flex items-center gap-4 mb-8">
-                <ShieldAlert className="text-amber-500 w-6 h-6 md:w-8 md:h-8" />
-                <h2 className="text-xl md:text-3xl font-phonk text-white uppercase">Protocol</h2>
+        {/* --- Rules & Protocols --- */}
+        <motion.section id="rules" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 font-jakarta">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20">
+            <LiquidGlassCard className="p-8 md:p-14 rounded-[2.5rem] md:rounded-[4rem]">
+              <div className="flex items-center gap-6 mb-10">
+                <ShieldAlert className="text-amber-500 w-8 h-8 md:w-10 md:h-10" />
+                <h2 className="text-2xl md:text-4xl font-phonk text-white uppercase">Protocol</h2>
               </div>
-              <ul className="space-y-4 md:space-y-6">
+              <ul className="space-y-6 md:space-y-8">
                 {HACKATHON_RULES.map((rule, i) => (
-                  <li key={i} className="flex gap-4 items-start">
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
-                    <p className="text-[10px] sm:text-base text-zinc-400 font-medium leading-relaxed">{rule}</p>
+                  <li key={i} className="flex gap-6 items-start">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 mt-2.5 shrink-0" />
+                    <p className="text-sm sm:text-lg text-zinc-400 font-medium leading-relaxed">{rule}</p>
                   </li>
                 ))}
               </ul>
             </LiquidGlassCard>
-            <div className="space-y-4 md:space-y-8">
-              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
-                <h3 className="font-phonk text-xs md:text-xl text-white uppercase mb-4 md:mb-6">Resources</h3>
-                <p className="text-[10px] md:text-sm text-zinc-400 mb-6 font-medium">Bring your own hardware. Permitted:</p>
-                <div className="flex flex-wrap gap-2">
-                  {['GenAI Tools', 'APIs', 'OSS Libs'].map((tag, i) => (
-                    <span key={i} className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px] md:text-sm font-bold uppercase tracking-widest">{tag}</span>
+            <div className="space-y-8 md:space-y-12">
+              <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
+                <h3 className="font-phonk text-[10px] md:text-2xl text-white uppercase mb-6 md:mb-10 tracking-widest">Resources</h3>
+                <p className="text-sm md:text-lg text-zinc-400 mb-8 font-medium leading-relaxed">Bring your own hardware. Permitted assets:</p>
+                <div className="flex flex-wrap gap-3">
+                  {['GenAI Tools', 'Agentic APIs', 'OSS Libraries', 'LangGraph'].map((tag, i) => (
+                    <span key={i} className="px-5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] md:text-sm font-bold uppercase tracking-widest">{tag}</span>
                   ))}
                 </div>
               </LiquidGlassCard>
-              <LiquidGlassCard className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
-                <h3 className="font-phonk text-xs md:text-xl text-white uppercase mb-4 md:mb-6">Rewards</h3>
-                <ul className="space-y-3 text-[10px] md:text-sm text-zinc-400 font-medium">
-                  <li className="flex items-center gap-3"><Award size={14} className="text-amber-500" /> Participation Certificates</li>
-                  <li className="flex items-center gap-3"><Trophy size={14} className="text-amber-500" /> Merit for Winners</li>
-                  <li className="flex items-center gap-3"><Gift size={14} className="text-amber-500" /> Exclusive Swag Bags</li>
+              <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
+                <h3 className="font-phonk text-[10px] md:text-2xl text-white uppercase mb-6 md:mb-10 tracking-widest">Rewards</h3>
+                <ul className="space-y-4 md:space-y-6 text-sm md:text-lg text-zinc-400 font-medium">
+                  <li className="flex items-center gap-4"><Award size={20} className="text-amber-500" /> Participation Certificates</li>
+                  <li className="flex items-center gap-4"><Trophy size={20} className="text-amber-500" /> Cash Prizes for Winners</li>
+                  <li className="flex items-center gap-4"><Gift size={20} className="text-amber-500" /> Exclusive Swag Bags</li>
                 </ul>
               </LiquidGlassCard>
             </div>
           </div>
         </motion.section>
 
-        <motion.section id="judging" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24 md:bg-white/[0.01] md:rounded-[4rem] font-jakarta">
-          <div className="mb-10 md:mb-16 flex flex-col items-center text-center">
-            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Judging</h2>
-            <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
+        {/* --- Judging --- */}
+        <motion.section id="judging" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 lg:bg-white/[0.01] lg:rounded-[5rem] font-jakarta">
+          <div className="mb-12 md:mb-20 flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">Judging</h2>
+            <div className="w-20 sm:w-24 h-1.5 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
             {JUDGING_CRITERIA.map((item, i) => (
-              <LiquidGlassCard key={i} className="p-6 md:p-8 rounded-[1.2rem] md:rounded-[2rem] hover:border-amber-500/20">
-                <h4 className="font-phonk text-[9px] md:text-base text-white uppercase tracking-widest mb-3 md:mb-4">{item.title}</h4>
-                <p className="text-[11px] md:text-base text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
+              <LiquidGlassCard key={i} className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] hover:border-amber-500/20 transition-all duration-500">
+                <h4 className="font-phonk text-[10px] md:text-lg text-white uppercase tracking-widest mb-5 leading-relaxed">{item.title}</h4>
+                <p className="text-sm md:text-lg text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
               </LiquidGlassCard>
             ))}
           </div>
         </motion.section>
 
-        <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-24 font-jakarta">
+        {/* --- Registration Section --- */}
+        <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 font-jakarta">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-            <LiquidGlassCard className="relative rounded-[2rem] md:rounded-[4rem] p-8 sm:p-12 md:p-24 text-center overflow-hidden transform-gpu">
-              <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-6 md:mb-10 leading-tight">Access Key</h2>
-              <div className="flex flex-col items-center gap-6 md:gap-8 mb-10 md:mb-16">
-                <p className="text-zinc-400 max-w-2xl mx-auto text-xs sm:text-lg tracking-wide font-medium leading-relaxed">
-                  Sync complete. Finalize via Unstop. Secure your unit's access to the singularity today. Check your encrypted mail for updates.
+            <LiquidGlassCard className="relative rounded-[3rem] md:rounded-[5rem] p-10 sm:p-16 md:p-28 text-center overflow-hidden transform-gpu">
+              <h2 className="text-3xl sm:text-6xl md:text-9xl font-phonk text-white uppercase mb-8 md:mb-12 leading-tight">Access Key</h2>
+              <div className="flex flex-col items-center gap-8 md:gap-12 mb-12 md:mb-20">
+                <p className="text-zinc-400 max-w-3xl mx-auto text-sm sm:text-2xl tracking-wide font-medium leading-relaxed">
+                  Secure your unit's access to the singularity. Finalize registration via Unstop. Limited seats available for the offline paradox.
                 </p>
-                <div className="flex flex-wrap justify-center gap-4 md:gap-10 text-[8px] md:text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                  <span className="flex items-center gap-2"><Utensils size={14} className="text-amber-500" /> Nutrients Included</span>
-                  <span className="flex items-center gap-2"><Globe size={14} className="text-amber-500" /> Open Network</span>
+                <div className="flex flex-wrap justify-center gap-6 md:gap-12 text-[10px] md:text-sm text-zinc-500 font-bold uppercase tracking-[0.3em]">
+                  <span className="flex items-center gap-3"><Utensils size={18} className="text-amber-500" /> Meals Included</span>
+                  <span className="flex items-center gap-3"><Globe size={18} className="text-amber-500" /> Open Network</span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 relative z-10">
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 relative z-10">
                 <motion.a 
                   href="#" target="_blank" 
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-10 py-5 md:px-12 md:py-6 bg-white text-black font-phonk text-[9px] md:text-sm uppercase tracking-[0.2em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl touch-manipulation"
+                  className="w-full lg:w-auto px-12 py-6 md:px-16 md:py-8 bg-white text-black font-phonk text-[10px] md:text-lg uppercase tracking-[0.25em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-3xl touch-manipulation"
                 >
-                  REGISTER NOW <ExternalLink size={14} />
+                  REGISTER NOW <ExternalLink size={20} />
                 </motion.a>
-                <div className="text-center sm:text-left">
-                  <p className="text-white text-base md:text-2xl font-extrabold tracking-wide uppercase">FEE: ₹350</p>
-                  <p className="text-zinc-500 text-[10px] md:text-[13px] italic font-semibold">Full refund if not selected</p>
+                <div className="text-center lg:text-left">
+                  <p className="text-white text-xl md:text-4xl font-extrabold tracking-widest uppercase">FEE: ₹350</p>
+                  <p className="text-zinc-500 text-xs md:text-lg italic font-semibold mt-1">Full refund if not selected</p>
                 </div>
               </div>
             </LiquidGlassCard>
           </motion.div>
         </motion.section>
 
-        <motion.section id="coordinators" {...sectionAnimation} className="max-w-7xl mx-auto px-6 py-12 md:py-24 text-center font-jakarta">
-          <div className="mb-10 md:mb-16 flex flex-col items-center text-center">
-            <h2 className="text-2xl sm:text-5xl md:text-7xl font-phonk text-white uppercase mb-4">Contacts</h2>
-            <div className="w-16 sm:w-20 h-1 bg-amber-500 rounded-full" />
+        {/* --- Coordinators Section --- */}
+        <motion.section id="coordinators" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 text-center font-jakarta">
+          <div className="mb-12 md:mb-20 flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">Contacts</h2>
+            <div className="w-20 sm:w-24 h-1.5 bg-amber-500 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 md:gap-16 max-w-5xl mx-auto">
             {COORDINATORS.map((person, i) => (
-              <motion.div key={i} whileHover={{ y: -8 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="group">
-                <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
-                  <div className="relative w-28 h-28 sm:w-48 md:w-56 sm:h-48 md:h-56 mx-auto mb-6 md:mb-8 overflow-hidden rounded-full">
-                    <img src={person.image} alt={person.name} className="w-full h-full object-cover border-4 border-white/10 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 shadow-2xl" />
+              <motion.div key={i} whileHover={{ y: -10 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="group">
+                <LiquidGlassCard className="p-10 md:p-16 rounded-[3rem] md:rounded-[4rem]">
+                  <div className="relative w-32 h-32 sm:w-56 sm:h-56 mx-auto mb-8 md:mb-12 overflow-hidden rounded-full ring-4 ring-white/5 group-hover:ring-amber-500/30 transition-all duration-500">
+                    <img src={person.image} alt={person.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 shadow-2xl" />
                   </div>
-                  <h4 className="font-phonk text-base md:text-2xl text-white uppercase mb-2 tracking-widest">{person.name}</h4>
-                  <p className="text-[9px] md:text-xs text-amber-500 font-bold uppercase tracking-[0.3em] mb-6 md:mb-8">{person.role}</p>
-                  <a href={person.linkedin} className="inline-block p-3 md:p-4 rounded-full bg-white/5 border border-white/10 hover:bg-amber-600/20 transition-all active:scale-90">
-                    <Linkedin className="text-amber-500 w-[18px] md:w-[20px] h-[18px] md:h-[20px]" />
+                  <h4 className="font-phonk text-lg md:text-3xl text-white uppercase mb-3 tracking-[0.1em]">{person.name}</h4>
+                  <p className="text-[10px] md:text-sm text-amber-500 font-bold uppercase tracking-[0.4em] mb-8 md:mb-12">{person.role}</p>
+                  <a href={person.linkedin} className="inline-block p-4 md:p-5 rounded-full bg-white/5 border border-white/10 hover:bg-amber-600 shadow-xl transition-all active:scale-90">
+                    <Linkedin className="text-white w-6 h-6 md:w-7 md:h-7" />
                   </a>
                 </LiquidGlassCard>
               </motion.div>
@@ -658,16 +670,20 @@ const App = () => {
         </motion.section>
       </main>
 
-      <footer className="py-16 md:py-24 text-center border-t border-white/5 bg-black/80 backdrop-blur-md font-jakarta">
-        <h2 className="font-phonk text-2xl sm:text-5xl md:text-7xl text-white uppercase opacity-15 tracking-[0.4em] md:tracking-[0.6em] mb-8 md:mb-12 select-none pointer-events-none">PARADOX</h2>
-        <div className="flex justify-center gap-6 md:gap-10 mb-8 md:mb-12 opacity-60">
+      {/* --- Footer --- */}
+      <footer className="py-20 md:py-32 text-center border-t border-white/5 bg-black/90 backdrop-blur-xl font-jakarta">
+        <h2 className="font-phonk text-3xl sm:text-6xl md:text-9xl text-white uppercase opacity-10 tracking-[0.5em] mb-12 select-none pointer-events-none">PARADOX</h2>
+        <div className="flex justify-center gap-8 md:gap-16 mb-12 md:mb-20 opacity-60">
           {[Instagram, Twitter, Linkedin].map((Icon, i) => (
-            <a key={i} href="#" className="text-white hover:text-amber-500 transition-all active:scale-75">
-              <Icon className="w-5 md:w-6 h-5 md:h-6" />
+            <a key={i} href="#" className="text-white hover:text-amber-500 hover:scale-125 transition-all active:scale-90">
+              <Icon className="w-6 md:w-8 h-6 md:h-8" />
             </a>
           ))}
         </div>
-        <p className="text-zinc-500 text-[8px] md:text-[10px] uppercase font-bold tracking-[0.3em] md:tracking-[0.6em] opacity-60 px-4 leading-loose">SIESGST ACM CHAPTER // EST. 2026 // NAVI MUMBAI </p>
+        <div className="px-6 space-y-4">
+          <p className="text-zinc-500 text-[10px] md:text-[13px] uppercase font-bold tracking-[0.4em] md:tracking-[0.8em] opacity-60 leading-loose">SIESGST ACM CHAPTER // EST. 2026 // NAVI MUMBAI </p>
+          <p className="text-zinc-700 text-[8px] md:text-[10px] font-medium tracking-[0.1em]">© 2026 PARADOX. ALL RIGHTS RESERVED.</p>
+        </div>
       </footer>
 
       <style>{`
@@ -682,11 +698,11 @@ const App = () => {
 
         html { 
           scroll-behavior: smooth; 
-          scroll-padding-top: 80px; 
+          scroll-padding-top: 60px; 
           overflow-y: scroll;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
           html { scroll-padding-top: 100px; }
         }
 
@@ -717,6 +733,12 @@ const App = () => {
         }
         .animate-slow-pulse { animation: slow-pulse 12s ease-in-out infinite; }
         
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin-slow 15s linear infinite; }
+
         .liquid-glass-effect {
           --mouse-x: 50%;
           --mouse-y: 50%;
@@ -732,22 +754,23 @@ const App = () => {
 
         ::selection { background: rgba(217, 119, 6, 0.4); }
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #02040a; }
         ::-webkit-scrollbar-thumb { background: #1a1c2e; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #amber-600; }
+        ::-webkit-scrollbar-thumb:hover { background: #d97706; }
 
         .transform-gpu {
           transform: translateZ(0);
           backface-visibility: hidden;
         }
 
-        /* Prevent text zoom on input for mobile */
         input, button { font-size: inherit; }
         
-        /* Fix for mobile height issues */
         .min-h-screen { min-height: 100vh; min-height: 100dvh; }
+
+        @media (max-width: 640px) {
+          .nav-logo-text { font-size: 8px; }
+        }
       `}</style>
     </div>
   )
