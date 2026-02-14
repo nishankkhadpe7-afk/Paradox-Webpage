@@ -431,7 +431,6 @@ const App = () => {
                     onClick={() => scrollTo(item.id)} 
                     className={`w-full py-5 text-[11px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 relative z-10 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-xl shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
                   >
-                    {activeSection === item.id && <Sparkles size={14} />}
                     {item.label}
                   </button>
                 ))}
@@ -630,7 +629,7 @@ const App = () => {
               </div>
               <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 relative z-10">
                 <motion.a 
-                  href="#" target="_blank" 
+                  href="#" target="_blank" rel="noopener noreferrer"
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   className="w-full lg:w-auto px-12 py-6 md:px-16 md:py-8 bg-white text-black font-phonk text-[10px] md:text-lg uppercase tracking-[0.25em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-3xl touch-manipulation"
                 >
