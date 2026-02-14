@@ -105,11 +105,11 @@ const InteractiveStars = memo(() => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d', { alpha: true });
     let animationFrameId;
     const particles = [];
-    const particleCount = window.innerWidth < 768 ? 60 : 200; 
+    const particleCount = window.innerWidth < 768 ? 60 : 200;
 
     class Star {
       constructor(w, h) { this.init(w, h); }
@@ -205,14 +205,14 @@ const SingularityCore = memo(({ scrollYProgress }) => {
       <motion.div style={{ scale, rotate: rotateScroll }} className="absolute inset-0 flex items-center justify-center will-change-transform transform-gpu origin-center z-10">
         <div className="relative flex items-center justify-center">
           <div className="absolute w-[90vw] h-[90vw] md:w-[60vw] md:h-[60vw] max-w-[650px] max-h-[650px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.06)_0%,transparent_75%)] blur-md animate-slow-pulse" />
-          
+
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute w-[80vw] h-[30vw] md:w-[45vw] md:h-[15vw] max-w-[550px] max-h-[180px] rounded-[100%] border-[2px] md:border-[6px] border-amber-500/10 blur-sm opacity-30" style={{ transform: "rotateX(75deg) rotateY(10deg)" }} />
-          
+
           <div className="absolute w-[45vw] h-[45vw] md:w-[31vw] md:h-[31vw] max-w-[335px] max-h-[335px] rounded-full bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.4)_0%,rgba(245,158,11,0.1)_40%,transparent_70%)] blur-[10px]" />
-          
+
           <div className="relative flex items-center justify-center translate-z-0">
             <div className="absolute w-[42vw] h-[42vw] md:w-[30.5vw] md:h-[30.5vw] max-w-[324px] max-h-[324px] rounded-full bg-amber-600/40 blur-[8px] shadow-[0_0_30px_rgba(245,158,11,0.6)]" />
-            
+
             <div className="w-[40vw] h-[40vw] md:w-[30vw] md:h-[30vw] max-w-[320px] max-h-[320px] rounded-full bg-black z-50 relative border border-amber-500/70 shadow-[inset_0_0_80px_rgba(0,0,0,1)] overflow-hidden">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_0%,rgba(245,158,11,0.08)_20%,transparent_40%,rgba(16,24,48,0.08)_60%,transparent_80%,transparent_100%)] opacity-20 blur-sm" />
               <div className="absolute top-[10%] left-[15%] w-[35%] h-[35%] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04)_0%,transparent_80%)] blur-sm" />
@@ -232,7 +232,7 @@ const CountdownTimer = memo(({ targetDate }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       const distance = new Date(targetDate).getTime() - new Date().getTime()
-      if (distance < 0) { clearInterval(timer) } 
+      if (distance < 0) { clearInterval(timer) }
       else {
         setTimeLeft({
           days: Math.floor(distance / (1000 * 60 * 60 * 24)),
@@ -264,14 +264,14 @@ const PrizePoolCard = () => {
   const rotateY = useTransform(mouseX, [-100, 100], [-10, 10]);
   const sprRotateX = useSpring(rotateX, { damping: 35, stiffness: 200 });
   const sprRotateY = useSpring(rotateY, { damping: 35, stiffness: 200 });
-  
+
   function handleMouseMove(event) {
     if (window.innerWidth < 768) return;
     const rect = event.currentTarget.getBoundingClientRect();
     mouseX.set(((event.clientX - rect.left) / rect.width - 0.5) * 160);
     mouseY.set(((event.clientY - rect.top) / rect.height - 0.5) * 160);
   }
-  
+
   return (
     <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} className="relative flex flex-col items-center my-8 md:my-12 px-4 w-full" style={{ perspective: 1200 }}>
       <motion.div onMouseMove={handleMouseMove} onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
@@ -279,7 +279,7 @@ const PrizePoolCard = () => {
         className="relative w-full max-w-[260px] sm:max-w-[340px] aspect-[4/5] bg-white/[0.04] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center p-6 sm:p-10 overflow-hidden shadow-2xl group hover:border-amber-500/40 transform-gpu"
       >
         <div className="flex flex-col items-center text-center">
-          <h2 className="font-keania text-4xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] uppercase">PRIZE<br/>POOL</h2>
+          <h2 className="font-keania text-4xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] uppercase">PRIZE<br />POOL</h2>
           <div className="w-12 sm:w-16 h-[2px] bg-amber-500/60 my-6 sm:my-8 rounded-full" />
           <p className="font-keania text-2xl sm:text-5xl text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors duration-500 uppercase">15000/- Rs</p>
         </div>
@@ -290,17 +290,17 @@ const PrizePoolCard = () => {
 
 
 const NavLogo = ({ className = "" }) => (
-    <div className={`flex items-center justify-center h-full ${className}`}>
-      <img 
-        src={logo} 
-        alt="Paradox Logo" 
-        className="h-8 sm:h-10 md:h-12 w-auto object-contain brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
-        onError={(e) => {
-          e.target.onerror = null; 
-          e.target.src = "https://via.placeholder.com/160x50/000000/FFFFFF?text=PARADOX";
-        }}
-      />
-    </div>
+  <div className={`flex items-center justify-center h-full ${className}`}>
+    <img
+      src={logo}
+      alt="Paradox Logo"
+      className="h-8 sm:h-10 md:h-12 w-auto object-contain brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = "https://via.placeholder.com/160x50/000000/FFFFFF?text=PARADOX";
+      }}
+    />
+  </div>
 )
 
 const App = () => {
@@ -314,8 +314,8 @@ const App = () => {
     const element = document.getElementById(id)
     if (element) {
       isScrollingManually.current = true
-      setIsMobileMenuOpen(false) 
-      setActiveSection(id) 
+      setIsMobileMenuOpen(false)
+      setActiveSection(id)
       element.scrollIntoView({ behavior: 'smooth' });
       setTimeout(() => { isScrollingManually.current = false }, 1000)
     }
@@ -334,18 +334,18 @@ const App = () => {
     let timeoutId;
     const handleScroll = () => {
       if (isScrollingManually.current) return
-      
+
       if (timeoutId) return;
       timeoutId = setTimeout(() => {
         const sections = navItems.map(item => document.getElementById(item.id))
         sections.push(document.getElementById('home'))
         const scrollPosition = window.scrollY + 200;
-        
+
         const current = sections.find(section => {
-            if (!section) return false;
-            const top = section.offsetTop;
-            const height = section.offsetHeight;
-            return scrollPosition >= top && scrollPosition < top + height;
+          if (!section) return false;
+          const top = section.offsetTop;
+          const height = section.offsetHeight;
+          return scrollPosition >= top && scrollPosition < top + height;
         });
 
         if (current && current.id !== activeSection) setActiveSection(current.id)
@@ -373,33 +373,33 @@ const App = () => {
 
       {/* --- Unified Navigation System --- */}
       <nav className="fixed top-4 md:top-8 left-0 right-0 z-[110] px-4 sm:px-10 flex justify-center pointer-events-none">
-        
+
         {/* PC/Desktop Layout (Wide Pill - strictly based on image_3c8b48.png / Group 1) */}
         <div className="hidden lg:flex items-center justify-between w-full max-w-7xl h-20 px-10 bg-black/50 border border-white/10 backdrop-blur-3xl rounded-full shadow-2xl pointer-events-auto">
-            {/* Vertically Centered Logo */}
-            <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full hover:opacity-80 transition-opacity">
-                <NavLogo />
-            </button>
+          {/* Vertically Centered Logo */}
+          <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full hover:opacity-80 transition-opacity">
+            <NavLogo />
+          </button>
 
-            {/* Links with Active & Hover Indicators */}
-            <div className="flex items-center gap-1">
-                {navItems.map((item) => (
-                    <button 
-                        key={item.id} 
-                        onClick={() => scrollTo(item.id)} 
-                        className={`relative px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}`}
-                    >
-                        {activeSection === item.id && (
-                          <motion.div 
-                            layoutId="active-desktop-nav" 
-                            className="absolute inset-0 rounded-full bg-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.4)] -z-10" 
-                            transition={{ type: "spring", stiffness: 400, damping: 30 }} 
-                          />
-                        )}
-                        {item.label}
-                    </button>
-                ))}
-            </div>
+          {/* Links with Active & Hover Indicators */}
+          <div className="flex items-center gap-1">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
+                className={`relative px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center ${activeSection === item.id ? 'text-white' : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'}`}
+              >
+                {activeSection === item.id && (
+                  <motion.div
+                    layoutId="active-desktop-nav"
+                    className="absolute inset-0 rounded-full bg-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.4)] -z-10"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Mobile/Tablet Layout (Compact Pill - strictly based on image_3ca570.png / Group 3) */}
@@ -407,18 +407,18 @@ const App = () => {
           <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full">
             <NavLogo className="scale-90" />
           </button>
-          
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2.5 text-white active:scale-90 transition-transform relative z-[130] flex items-center justify-center"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
           </button>
-          
+
           <AnimatePresence>
             {isMobileMenuOpen && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 15, scale: 0.95 }}
                 animate={{ opacity: 1, y: 20, scale: 1 }}
                 exit={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -426,9 +426,9 @@ const App = () => {
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 blur-3xl rounded-full" />
                 {navItems.map((item) => (
-                  <button 
-                    key={item.id} 
-                    onClick={() => scrollTo(item.id)} 
+                  <button
+                    key={item.id}
+                    onClick={() => scrollTo(item.id)}
                     className={`w-full py-5 text-[11px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 relative z-10 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-xl shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
                   >
                     {item.label}
@@ -445,20 +445,24 @@ const App = () => {
         <section id="home" className="min-h-[100dvh] flex flex-col items-center justify-center px-6 sm:px-10 text-center pt-32 sm:pt-48 pb-12">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="flex flex-col items-center w-full max-w-5xl">
             <span className="font-phonk text-amber-500/80 tracking-[0.2em] md:tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 md:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
-            <div className="relative mb-8 md:mb-12 w-full">
-              <h1 className="text-[clamp(2.5rem,14vw,12rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl">PARA<span className="text-amber-600">DOX</span></h1>
-              <p className="mt-4 sm:mt-8 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80">CERTAIN ONLY IN UNCERTAINTY</p>
-            </div>
-            
+            <div className="relative mb-8 md:mb-12 w-full flex flex-col items-center justify-center">
+  <h1 className="text-[clamp(2.5rem,14vw,12rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl text-center mr-[-0.05em]">
+    PARA<span className="text-amber-600">DOX</span>
+  </h1>
+  <p className="mt-4 sm:mt-8 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80 text-center">
+    CERTAIN ONLY IN UNCERTAINTY
+  </p>
+</div>
+
             <LiquidGlassCard className="mb-4 px-6 sm:px-10 py-8 sm:py-12 rounded-[2rem] sm:rounded-[3rem] w-full max-w-4xl">
               <CountdownTimer targetDate="2026-03-05T09:00:00" />
             </LiquidGlassCard>
 
             <PrizePoolCard />
-            
-            <motion.button 
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} 
-              onClick={() => scrollTo('register')} 
+
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => scrollTo('register')}
               className="px-12 sm:px-24 py-5 sm:py-6 bg-white text-black font-phonk uppercase tracking-[0.2em] rounded-full text-[9px] sm:text-sm hover:bg-amber-500 hover:text-white transition-all duration-300 shadow-2xl active:scale-95 touch-manipulation mt-4"
             >
               Start Registration
@@ -469,7 +473,7 @@ const App = () => {
         {/* --- About Section --- */}
         <motion.section id="about" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32">
           <div className="mb-12 md:mb-20 flex flex-col items-center text-center">
-            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">The Paradox</h2>
+            <h2 className="text-3xl sm:text-6xl md:text-8xl font-phonk text-white uppercase mb-4">Event Details</h2>
             <div className="w-20 sm:w-24 h-1.5 bg-amber-500 rounded-full" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-start">
@@ -563,8 +567,7 @@ const App = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20">
             <LiquidGlassCard className="p-8 md:p-14 rounded-[2.5rem] md:rounded-[4rem]">
               <div className="flex items-center gap-6 mb-10">
-                <ShieldAlert className="text-amber-500 w-8 h-8 md:w-10 md:h-10" />
-                <h2 className="text-2xl md:text-4xl font-phonk text-white uppercase">Protocol</h2>
+                <h2 className="text-2xl md:text-4xl font-phonk text-white uppercase">Rules</h2>
               </div>
               <ul className="space-y-6 md:space-y-8">
                 {HACKATHON_RULES.map((rule, i) => (
@@ -617,7 +620,10 @@ const App = () => {
         <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32 font-jakarta">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
             <LiquidGlassCard className="relative rounded-[3rem] md:rounded-[5rem] p-10 sm:p-16 md:p-28 text-center overflow-hidden transform-gpu">
-              <h2 className="text-3xl sm:text-6xl md:text-9xl font-phonk text-white uppercase mb-8 md:mb-12 leading-tight">Access Key</h2>
+              <div className="w-full flex justify-center">
+              <h2 className="text-[clamp(1.5rem,8vw,7rem)] font-phonk text-white uppercase mb-8 md:mb-12 leading-tight tracking-tighter text-center">Registration
+              </h2>
+              </div>
               <div className="flex flex-col items-center gap-8 md:gap-12 mb-12 md:mb-20">
                 <p className="text-zinc-400 max-w-3xl mx-auto text-sm sm:text-2xl tracking-wide font-medium leading-relaxed">
                   Secure your unit's access to the singularity. Finalize registration via Unstop. Limited seats available for the offline paradox.
@@ -628,7 +634,7 @@ const App = () => {
                 </div>
               </div>
               <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 relative z-10">
-                <motion.a 
+                <motion.a
                   href="#" target="_blank" rel="noopener noreferrer"
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   className="w-full lg:w-auto px-12 py-6 md:px-16 md:py-8 bg-white text-black font-phonk text-[10px] md:text-lg uppercase tracking-[0.25em] rounded-full hover:bg-amber-500 hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-3xl touch-manipulation"
