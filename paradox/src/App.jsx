@@ -6,56 +6,78 @@ import {
   Building2, UserPlus, Twitter, Info, MapPin, Calendar, CreditCard, ExternalLink, AlertTriangle,
   Lightbulb, Code, Target, MessageSquare, Monitor, FastForward, Award, CheckCircle2,
   Cpu as CpuIcon, Sparkles, Coins, Users2, GraduationCap, Laptop, Utensils, Search, Boxes, ClipboardCheck,
-  FileText, ShieldAlert, Gift, Camera
+  FileText, ShieldAlert, Gift, Camera, Scale, ShieldCheck, HeartHandshake, ArrowUpRight
 } from 'lucide-react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion';
-import logo from './assets/image4.png'
+
+// --- Assets ---
+// Note: Relative imports of local assets may fail in certain environments.
+// Replace the empty string below with your actual image path or a hosted URL.
+import logo from './assets/image4.png';
 
 // --- Data Constants ---
 const ELIGIBILITY = [
-  { icon: GraduationCap, title: 'Undergraduate Students', desc: 'Open to all undergraduate students. Eligible degrees include: B.Tech / B.E., B.Sc. (Computer Science / IT / related fields), and BCA.' },
-  { icon: Globe, title: 'Open Access', desc: 'Students from any college and any department/branch are allowed. Inter-college teams / Inter-branch / Inter-specialization teams are allowed.' },
-  { icon: UserPlus, title: 'Valid Identification', desc: 'Participants must carry a valid college ID card during the offline round.' }
+  { 
+    icon: GraduationCap, 
+    title: 'Academic Standing', 
+    desc: 'Open to all undergraduate students. Eligible degrees: B.Tech / B.E., B.Sc. (CS / IT / Related), and BCA.' 
+  },
+  { 
+    icon: Globe, 
+    title: 'Open Access', 
+    desc: 'Students from any college, department, or branch are allowed. Inter-college and inter-branch teams are permitted.' 
+  },
+  { 
+    icon: UserPlus, 
+    title: 'Valid Identification', 
+    desc: 'All participants must carry a valid college ID card for verification during the offline round at SIESGST.' 
+  }
 ]
 
 const TEAM_RULES = [
   'Team size: 3 to 4 members',
-  'Each participant can be part of only one team',
-  'Once registered, team members cannot be changed',
-  'No participant is allowed to join multiple teams'
+  'Participants can only be part of one team',
+  'Team members cannot be changed after registration',
+  'Joining multiple teams results in disqualification'
 ]
 
 const ROUNDS = [
   {
     id: '01',
     title: 'Round 1: Idea Submission (Online)',
-    desc: 'Teams must submit an original idea/proposal clearly mentioning the problem statement, proposed solution, use of Agentic AI, and expected impact.',
-    eval: 'Ideas will be evaluated on: Innovation, Feasibility, Technical Depth, Relevance, and Impact.',
-    footer: 'Top 40 teams will be shortlisted for the offline round. Teams not shortlisted receive a 100% registration fee refund.'
+    desc: 'Submit a proposal detailing the problem statement, solution, use of Agentic AI, and expected impact.',
+    eval: 'Evaluated on Innovation, Feasibility, Technical Depth, Relevance, and Impact.',
+    footer: 'Top 40 teams advance. Non-shortlisted teams receive a 100% registration fee refund.'
   },
   {
     id: '02',
-    title: 'Round 2: Offline Hackathon & MVP Development',
-    desc: 'Shortlisted teams participate onsite at SIESGST. Problem statement will be revealed on the event day.',
-    eval: 'Continuous coding duration: 6–7 hours. Teams must build and present a functional MVP (Minimum Viable Product).',
-    footer: 'Mentors and judges will be available. Final evaluation conducted at the venue.'
+    title: 'Round 2: Offline Hackathon & MVP',
+    desc: 'A 6–7 hour continuous coding sprint at SIESGST. The specific paradox will be revealed on the spot.',
+    eval: 'Build and present a functional Minimum Viable Product (MVP). Mentors & judges will assist.',
+    footer: 'Final presentations and evaluation conducted onsite at the venue.'
   }
 ]
 
 const JUDGING_CRITERIA = [
-  { title: 'Innovation & Creativity', desc: 'Novelty of the concept and use of Agentic AI.' },
-  { title: 'Technical Implementation', desc: 'Complexity, code quality, and logic of the solution.' },
-  { title: 'Problem-Solving Approach', desc: 'Effectiveness of the solution to the problem statement.' },
-  { title: 'Statement Relevance', desc: 'How well the solution addresses the revealed paradox.' },
-  { title: 'Presentation & Demonstration', desc: 'Clarity of thought and professionalism in pitching.' }
+  { title: 'Innovation & Creativity', desc: 'Novelty of the concept and unique use of Agentic AI.' },
+  { title: 'Technical Implementation', desc: 'Complexity, code quality, and logic of the MVP.' },
+  { title: 'Problem-Solving', desc: 'How effectively the solution addresses the problem statement.' },
+  { title: 'Paradox Relevance', desc: 'Alignment with the specific paradox revealed on the day.' },
+  { title: 'Presentation', desc: 'Clarity of thought and professionalism in the final pitch.' }
 ]
 
 const HACKATHON_RULES = [
   'Only original ideas and implementations are allowed.',
-  'Pre-built or previously developed projects are strictly not allowed.',
-  'Any form of plagiarism, misrepresentation, or unethical behavior results in immediate disqualification.',
-  'Teams must be present for the entire offline round; no-shows will be disqualified.',
+  'Pre-built or previously developed projects are strictly forbidden.',
+  'Disqualification for plagiarism, misrepresentation, or unethical behavior.',
+  'Teams must be present for the entire offline round; no-shows are disqualified.',
   'Participants must maintain discipline and professional conduct at all times.'
+]
+
+const PROTOCOLS = [
+  { icon: ShieldCheck, title: 'Code of Conduct', desc: 'Ethical behavior is mandatory. Any venue damage or malpractice during evaluation leads to direct disqualification.' },
+  { icon: Camera, title: 'Media & Rights', desc: 'Participants grant permission for photography/videography. Organizers reserve rights to modify or postpone the event.' },
+  { icon: HeartHandshake, title: 'Personal Responsibility', desc: 'Travel and personal belongings are the responsibility of participants. Stay updated via Unstop and email.' }
 ]
 
 const COORDINATORS = [
@@ -288,18 +310,22 @@ const PrizePoolCard = () => {
   )
 }
 
-
+/**
+ * NavLogo Component
+ * Strictly uses the logo asset without overlapping text as requested.
+ */
 const NavLogo = ({ className = "" }) => (
   <div className={`flex items-center justify-center h-full ${className}`}>
-    <img
-      src={logo}
-      alt="Paradox Logo"
-      className="h-8 sm:h-10 md:h-12 w-auto object-contain brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
-      onError={(e) => {
-        e.target.onerror = null;
-        e.target.src = "https://via.placeholder.com/160x50/000000/FFFFFF?text=PARADOX";
-      }}
-    />
+    {logo && (
+      <img 
+        src={logo} 
+        alt="Paradox Logo" 
+        className="h-8 sm:h-10 md:h-11 w-auto object-contain brightness-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+        onError={(e) => {
+          e.target.style.display = 'none';
+        }}
+      />
+    )}
   </div>
 )
 
@@ -366,6 +392,34 @@ const App = () => {
     transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
   }
 
+  // Variants for Mobile Nav Animations
+  const menuVariants = {
+    closed: { opacity: 0, y: -20, scale: 0.95 },
+    open: { 
+      opacity: 1, 
+      y: 15, 
+      scale: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+        ease: "easeOut",
+        duration: 0.4
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -10, 
+      scale: 0.98,
+      transition: { staggerChildren: 0.05, staggerDirection: -1 } 
+    }
+  }
+
+  const itemVariants = {
+    closed: { opacity: 0, x: -10 },
+    open: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 10 }
+  }
+
   return (
     <div ref={containerRef} className="relative min-h-screen bg-[#02040a] text-zinc-300 selection:bg-amber-600/30 overflow-x-hidden">
       <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] grain-texture" />
@@ -374,14 +428,12 @@ const App = () => {
       {/* --- Unified Navigation System --- */}
       <nav className="fixed top-4 md:top-8 left-0 right-0 z-[110] px-4 sm:px-10 flex justify-center pointer-events-none">
 
-        {/* PC/Desktop Layout (Wide Pill - strictly based on image_3c8b48.png / Group 1) */}
+        {/* PC/Desktop Layout */}
         <div className="hidden lg:flex items-center justify-between w-full max-w-7xl h-20 px-10 bg-black/50 border border-white/10 backdrop-blur-3xl rounded-full shadow-2xl pointer-events-auto">
-          {/* Vertically Centered Logo */}
           <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full hover:opacity-80 transition-opacity">
             <NavLogo />
           </button>
 
-          {/* Links with Active & Hover Indicators */}
           <div className="flex items-center gap-1">
             {navItems.map((item) => (
               <button
@@ -402,7 +454,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* Mobile/Tablet Layout (Compact Pill - strictly based on image_3ca570.png / Group 3) */}
+        {/* Mobile/Tablet Layout */}
         <div className="lg:hidden flex items-center justify-between w-full max-w-2xl h-14 sm:h-16 px-6 bg-black/70 border border-white/10 rounded-full backdrop-blur-3xl shadow-2xl pointer-events-auto relative">
           <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full">
             <NavLogo className="scale-90" />
@@ -419,21 +471,51 @@ const App = () => {
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                animate={{ opacity: 1, y: 20, scale: 1 }}
-                exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-4 bg-black/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-4xl flex flex-col gap-3 z-[125] overflow-hidden"
+                variants={menuVariants}
+                initial="closed"
+                animate="open"
+                exit="exit"
+                className="absolute top-full left-0 right-0 mt-4 bg-[#0a0c14]/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-4 sm:p-6 shadow-[0_32px_64px_rgba(0,0,0,0.8)] flex flex-col gap-2 z-[125] overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 blur-3xl rounded-full" />
-                {navItems.map((item) => (
-                  <button
+                {/* Visual Accent */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-amber-600/50 to-transparent rounded-full opacity-50" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-amber-600/5 blur-[60px] rounded-full pointer-events-none" />
+
+                {navItems.map((item, index) => (
+                  <motion.button
                     key={item.id}
+                    variants={itemVariants}
                     onClick={() => scrollTo(item.id)}
-                    className={`w-full py-5 text-[11px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 relative z-10 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-xl shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
+                    className={`group w-full py-4 px-6 text-[11px] font-bold uppercase tracking-[0.2em] rounded-2xl border transition-all duration-300 flex items-center justify-between relative overflow-hidden ${
+                      activeSection === item.id 
+                        ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-600/20' 
+                        : 'bg-white/[0.03] border-white/5 text-zinc-400 active:bg-white/10 active:scale-[0.98]'
+                    }`}
                   >
-                    {item.label}
-                  </button>
+                    <div className="flex items-center gap-4 relative z-10">
+                      <span className={`font-phonk text-[9px] opacity-40 ${activeSection === item.id ? 'text-white' : 'text-amber-500'}`}>
+                        0{index + 1}
+                      </span>
+                      <span>{item.label}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 relative z-10">
+                      {activeSection === item.id ? (
+                         <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      ) : (
+                        <ArrowUpRight size={14} className="opacity-20 group-hover:opacity-100 group-hover:text-amber-500 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      )}
+                    </div>
+
+                    {/* Subtle Hover Reveal */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-600/0 via-amber-600/5 to-amber-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  </motion.button>
                 ))}
+
+                {/* Mobile Menu Footer Branding */}
+                <div className="mt-4 pt-4 border-t border-white/5 text-center">
+                  <span className="font-phonk text-[7px] text-zinc-600 uppercase tracking-[0.5em]">Paradox Protocol v1.0</span>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -446,13 +528,13 @@ const App = () => {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }} className="flex flex-col items-center w-full max-w-5xl">
             <span className="font-phonk text-amber-500/80 tracking-[0.2em] md:tracking-[0.4em] text-[8px] sm:text-xs font-bold uppercase mb-4 md:mb-8">SIESGST ACM CHAPTER PRESENTS</span>
             <div className="relative mb-8 md:mb-12 w-full flex flex-col items-center justify-center">
-  <h1 className="text-[clamp(2.5rem,14vw,12rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl text-center mr-[-0.05em]">
-    PARA<span className="text-amber-600">DOX</span>
-  </h1>
-  <p className="mt-4 sm:mt-8 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80 text-center">
-    CERTAIN ONLY IN UNCERTAINTY
-  </p>
-</div>
+              <h1 className="text-[clamp(2.5rem,14vw,12rem)] font-phonk text-white uppercase leading-none tracking-tighter drop-shadow-2xl text-center mr-[-0.05em]">
+                PARA<span className="text-amber-600">DOX</span>
+              </h1>
+              <p className="mt-4 sm:mt-8 font-phonk text-zinc-400 text-[9px] sm:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase max-w-2xl mx-auto px-4 leading-relaxed italic opacity-80 text-center">
+                CERTAIN ONLY IN UNCERTAINTY
+              </p>
+            </div>
 
             <LiquidGlassCard className="mb-4 px-6 sm:px-10 py-8 sm:py-12 rounded-[2rem] sm:rounded-[3rem] w-full max-w-4xl">
               <CountdownTimer targetDate="2026-03-05T09:00:00" />
@@ -479,7 +561,7 @@ const App = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-start">
             <div className="space-y-8 md:space-y-12 font-jakarta text-zinc-300 leading-relaxed font-medium">
               <p className="text-lg sm:text-2xl">
-                Paradox is an inter-collegiate Agentic AI Hackathon designed to bring together innovative minds to build intelligent, autonomous AI-driven solutions. The hackathon encourages creativity, problem-solving, and hands-on implementation using Agentic AI concepts and modern technologies.
+                Paradox is an inter-collegiate Agentic AI Hackathon designed to bring together innovative minds to build intelligent, autonomous AI-driven solutions. The hackathon encourages creativity, problem-solving, and hands-on implementation using modern technologies.
               </p>
               <LiquidGlassCard className="p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem]">
                 <p className="text-sm sm:text-lg text-zinc-400 font-semibold italic">
@@ -490,8 +572,8 @@ const App = () => {
             <div className="grid grid-cols-2 gap-4 sm:gap-8 font-jakarta">
               {[
                 { icon: Calendar, label: 'Date', val: '5 Mar 2026' },
-                { icon: MapPin, label: 'Venue', val: 'Navi Mumbai' },
-                { icon: Clock, label: 'Duration', val: '10 Hours' },
+                { icon: MapPin, label: 'Venue', val: 'SIESGST, Navi Mumbai' },
+                { icon: Clock, label: 'Duration', val: '10 Hours Total' },
                 { icon: CreditCard, label: 'Fee', val: '₹350' }
               ].map((item, i) => (
                 <LiquidGlassCard key={i} className="p-6 sm:p-8 rounded-3xl flex flex-col gap-3 sm:gap-6">
@@ -555,7 +637,7 @@ const App = () => {
                 <div className="space-y-6 md:space-y-8 relative z-10">
                   <p className="text-sm md:text-xl text-zinc-300 font-medium leading-relaxed">{round.desc}</p>
                   <div className="p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/5 text-xs md:text-lg text-zinc-400 italic leading-relaxed">{round.eval}</div>
-                  <p className="text-xs md:text-base text-amber-500 font-bold tracking-widest">{round.footer}</p>
+                  <p className="text-xs md:text-base text-amber-500 font-bold tracking-widest bg-amber-500/10 px-4 py-2 rounded-lg inline-block">{round.footer}</p>
                 </div>
               </LiquidGlassCard>
             ))}
@@ -581,7 +663,7 @@ const App = () => {
             <div className="space-y-8 md:space-y-12">
               <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
                 <h3 className="font-phonk text-[10px] md:text-2xl text-white uppercase mb-6 md:mb-10 tracking-widest">Resources</h3>
-                <p className="text-sm md:text-lg text-zinc-400 mb-8 font-medium leading-relaxed">Bring your own hardware. Permitted assets:</p>
+                <p className="text-sm md:text-lg text-zinc-400 mb-8 font-medium leading-relaxed">Bring your own laptops. Food and internet provided.</p>
                 <div className="flex flex-wrap gap-3">
                   {['GenAI Tools', 'Agentic APIs', 'OSS Libraries', 'LangGraph'].map((tag, i) => (
                     <span key={i} className="px-5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] md:text-sm font-bold uppercase tracking-widest">{tag}</span>
@@ -591,12 +673,22 @@ const App = () => {
               <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
                 <h3 className="font-phonk text-[10px] md:text-2xl text-white uppercase mb-6 md:mb-10 tracking-widest">Rewards</h3>
                 <ul className="space-y-4 md:space-y-6 text-sm md:text-lg text-zinc-400 font-medium">
-                  <li className="flex items-center gap-4"><Award size={20} className="text-amber-500" /> Participation Certificates</li>
-                  <li className="flex items-center gap-4"><Trophy size={20} className="text-amber-500" /> Cash Prize for Winners</li>
+                  <li className="flex items-center gap-4"><Trophy size={20} className="text-amber-500" /> Cash Prizes for Winners</li>
+                  <li className="flex items-center gap-4"><CheckCircle2 size={20} className="text-amber-500" /> Merit & Participation Certificates</li>
                   <li className="flex items-center gap-4"><Gift size={20} className="text-amber-500" /> Exclusive Swag Bags</li>
                 </ul>
               </LiquidGlassCard>
             </div>
+          </div>
+          
+          <div className="mt-12 md:mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {PROTOCOLS.map((protocol, i) => (
+              <LiquidGlassCard key={i} className="p-8 rounded-[2rem]">
+                <protocol.icon size={24} className="text-amber-500 mb-6" />
+                <h4 className="font-phonk text-[10px] md:text-base text-white uppercase mb-4 tracking-widest">{protocol.title}</h4>
+                <p className="text-sm text-zinc-500 leading-relaxed">{protocol.desc}</p>
+              </LiquidGlassCard>
+            ))}
           </div>
         </motion.section>
 
@@ -626,7 +718,7 @@ const App = () => {
               </div>
               <div className="flex flex-col items-center gap-8 md:gap-12 mb-12 md:mb-20">
                 <p className="text-zinc-400 max-w-3xl mx-auto text-sm sm:text-2xl tracking-wide font-medium leading-relaxed">
-                  Secure your unit's access to the singularity. Finalize registration via Unstop. Limited seats available for the offline paradox.
+                  Secure your unit's access via Unstop. Final selection grants access to the offline paradox at SIESGST. 
                 </p>
                 <div className="flex flex-wrap justify-center gap-6 md:gap-12 text-[10px] md:text-sm text-zinc-500 font-bold uppercase tracking-[0.3em]">
                   <span className="flex items-center gap-3"><Utensils size={18} className="text-amber-500" /> Meals Included</span>
@@ -643,7 +735,7 @@ const App = () => {
                 </motion.a>
                 <div className="text-center lg:text-left">
                   <p className="text-white text-xl md:text-4xl font-extrabold tracking-widest uppercase">FEE: ₹350</p>
-                  <p className="text-zinc-500 text-xs md:text-lg italic font-semibold mt-1">Full refund if not selected</p>
+                  <p className="text-zinc-500 text-xs md:text-lg italic font-semibold mt-1">Full refund if Round 1 is not cleared</p>
                 </div>
               </div>
             </LiquidGlassCard>
@@ -738,12 +830,6 @@ const App = () => {
         }
         .animate-slow-pulse { animation: slow-pulse 12s ease-in-out infinite; }
         
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow { animation: spin-slow 15s linear infinite; }
-
         .liquid-glass-effect {
           --mouse-x: 50%;
           --mouse-y: 50%;
@@ -769,13 +855,7 @@ const App = () => {
           backface-visibility: hidden;
         }
 
-        input, button { font-size: inherit; }
-        
         .min-h-screen { min-height: 100vh; min-height: 100dvh; }
-
-        @media (max-width: 640px) {
-          .nav-logo-text { font-size: 8px; }
-        }
       `}</style>
     </div>
   )
