@@ -11,7 +11,7 @@ import {
 import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion';
 
 // --- Assets ---
-const logo = null; // Placeholder for asset logic
+import logo from './assets/image4.png';
 
 // --- Data Constants ---
 const ELIGIBILITY = [
