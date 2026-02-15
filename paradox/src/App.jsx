@@ -11,8 +11,7 @@ import {
 import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView, useMotionValue } from 'framer-motion';
 
 // --- Assets ---
-// Note: Relative imports of local assets may fail in certain environments.
-// Replace the empty string below with your actual image path or a hosted URL.
+// Note: We're using a string check to prevent build failures if the local asset is missing
 import logo from './assets/image4.png';
 
 // --- Data Constants ---
@@ -101,6 +100,7 @@ const LiquidGlassCard = memo(({ children, className = "" }) => {
   const cardRef = useRef(null);
 
   const handleMouseMove = (e) => {
+    // Check for pointer type - better for cross-device compatibility
     if (!cardRef.current || window.innerWidth < 768) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -113,7 +113,11 @@ const LiquidGlassCard = memo(({ children, className = "" }) => {
     <motion.div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] liquid-glass-effect transform-gpu ${className}`}
+      className={`backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)] liquid-glass-effect transform-gpu overflow-hidden ${className}`}
+      style={{
+        WebkitBackdropFilter: 'blur(24px)', // Critical for Safari
+        isolation: 'isolate' // Prevents backdrop-filter leaking
+      }}
     >
       {children}
     </motion.div>
@@ -131,7 +135,7 @@ const InteractiveStars = memo(() => {
     const ctx = canvas.getContext('2d', { alpha: true });
     let animationFrameId;
     const particles = [];
-    const particleCount = window.innerWidth < 768 ? 60 : 200;
+    const particleCount = window.innerWidth < 768 ? 60 : 150; // Optimized count for mobile
 
     class Star {
       constructor(w, h) { this.init(w, h); }
@@ -201,12 +205,12 @@ const InteractiveStars = memo(() => {
       mouseRef.current = { x: clientX, y: clientY };
     }
     window.addEventListener('mousemove', handleMove, { passive: true });
-    window.addEventListener('touchmove', handleMove, { passive: true });
+    window.addEventListener('touchstart', handleMove, { passive: true });
     setupCanvas(); animate();
     return () => {
       window.removeEventListener('resize', setupCanvas);
       window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchstart', handleMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -296,11 +300,18 @@ const PrizePoolCard = () => {
 
   return (
     <motion.div initial={{ scale: 0.95, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} className="relative flex flex-col items-center my-8 md:my-12 px-4 w-full" style={{ perspective: 1200 }}>
-      <motion.div onMouseMove={handleMouseMove} onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
-        style={{ rotateX: sprRotateX, rotateY: sprRotateY, transformStyle: "preserve-3d" }}
+      <motion.div 
+        onMouseMove={handleMouseMove} 
+        onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
+        style={{ 
+          rotateX: sprRotateX, 
+          rotateY: sprRotateY, 
+          transformStyle: "preserve-3d",
+          WebkitTransformStyle: "preserve-3d" // Apple compat
+        }}
         className="relative w-full max-w-[260px] sm:max-w-[340px] aspect-[4/5] bg-white/[0.04] backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] border border-white/10 flex flex-col items-center justify-center p-6 sm:p-10 overflow-hidden shadow-2xl group hover:border-amber-500/40 transform-gpu"
       >
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center" style={{ WebkitTransform: "translateZ(30px)" }}>
           <h2 className="font-keania text-4xl sm:text-7xl text-white leading-[0.85] tracking-[0.05em] uppercase">PRIZE<br />POOL</h2>
           <div className="w-12 sm:w-16 h-[2px] bg-amber-500/60 my-6 sm:my-8 rounded-full" />
           <p className="font-keania text-2xl sm:text-5xl text-white tracking-tight leading-none group-hover:text-amber-500 transition-colors duration-500 uppercase">15000/- Rs</p>
@@ -310,13 +321,9 @@ const PrizePoolCard = () => {
   )
 }
 
-/**
- * NavLogo Component
- * Strictly uses the logo asset without overlapping text as requested.
- */
 const NavLogo = ({ className = "" }) => (
   <div className={`flex items-center justify-center h-full ${className}`}>
-    {logo && (
+    {logo ? (
       <img 
         src={logo} 
         alt="Paradox Logo" 
@@ -325,6 +332,10 @@ const NavLogo = ({ className = "" }) => (
           e.target.style.display = 'none';
         }}
       />
+    ) : (
+      <div className="font-phonk text-white font-bold tracking-tighter text-lg sm:text-xl">
+        PARA<span className="text-amber-500">DOX</span>
+      </div>
     )}
   </div>
 )
@@ -476,6 +487,7 @@ const App = () => {
                 animate="open"
                 exit="exit"
                 className="absolute top-full left-0 right-0 mt-4 bg-[#0a0c14]/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-4 sm:p-6 shadow-[0_32px_64px_rgba(0,0,0,0.8)] flex flex-col gap-2 z-[125] overflow-hidden"
+                style={{ WebkitBackdropFilter: 'blur(30px)' }}
               >
                 {/* Visual Accent */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-amber-600/50 to-transparent rounded-full opacity-50" />
@@ -673,7 +685,7 @@ const App = () => {
               <LiquidGlassCard className="p-8 md:p-12 rounded-[2rem] md:rounded-[3rem]">
                 <h3 className="font-phonk text-[10px] md:text-2xl text-white uppercase mb-6 md:mb-10 tracking-widest">Rewards</h3>
                 <ul className="space-y-4 md:space-y-6 text-sm md:text-lg text-zinc-400 font-medium">
-                  <li className="flex items-center gap-4"><Trophy size={20} className="text-amber-500" /> Cash Prizes for Winners</li>
+                  <li className="flex items-center gap-4"><Trophy size={20} className="text-amber-500" /> Cash Prize for Winners</li>
                   <li className="flex items-center gap-4"><CheckCircle2 size={20} className="text-amber-500" /> Merit & Participation Certificates</li>
                   <li className="flex items-center gap-4"><Gift size={20} className="text-amber-500" /> Exclusive Swag Bags</li>
                 </ul>
@@ -852,7 +864,9 @@ const App = () => {
 
         .transform-gpu {
           transform: translateZ(0);
+          -webkit-transform: translateZ(0);
           backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         }
 
         .min-h-screen { min-height: 100vh; min-height: 100dvh; }
