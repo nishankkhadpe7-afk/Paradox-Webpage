@@ -670,7 +670,7 @@ const App = () => {
         {/* --- Registration --- */}
         <motion.section id="register" {...sectionAnimation} className="max-w-7xl mx-auto px-6 sm:px-10 py-16 md:py-32">
           <LiquidGlassCard className="relative rounded-[3rem] p-10 sm:p-16 md:p-28 text-center overflow-hidden">
-            <h2 className="text-[clamp(1.5rem,8vw,7rem)] font-phonk text-white uppercase mb-8 leading-tight tracking-tighter">Registration</h2>
+          <h2 className="text-[clamp(1.5rem,8vw,7rem)] font-phonk text-white uppercase mb-8 leading-tight tracking-tighter w-full text-center">Registration</h2>
             <p className="text-zinc-400 max-w-3xl mx-auto text-sm sm:text-2xl tracking-wide font-medium leading-relaxed mb-12">Secure your unit's access via Unstop. Final selection grants entry to the offline Paradox at SIESGST.</p>
             <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 relative z-10">
               <motion.a
