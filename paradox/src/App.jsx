@@ -402,49 +402,42 @@ const App = () => {
           </div>
         </div>
 
-        {/* Mobile/Tablet Layout */}
-        <div className="lg:hidden flex items-center justify-between w-full max-w-2xl h-14 sm:h-16 px-6 bg-black/70 border border-white/10 rounded-full shadow-2xl pointer-events-auto relative isolate"
-        style={{ 
-        backdropFilter: 'blur(24px)', 
-        WebkitBackdropFilter: 'blur(24px)',
-        marginTop: 'env(safe-area-inset-top)' 
-        }}>
-        <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full">
-        <NavLogo className="scale-75" />
-        </button>
-  
-        <button 
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-        className="p-2.5 text-white active:scale-90 transition-transform relative z-[130] flex items-center justify-center"
-        >
-        {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
-        </button>
-  
-        <AnimatePresence>
-        {isMobileMenuOpen && (
-        <motion.div 
-          initial={{ opacity: 0, y: 15, scale: 0.95 }}
-          animate={{ opacity: 1, y: 20, scale: 1 }}
-          exit={{ opacity: 0, y: 15, scale: 0.95 }}
-          className="absolute top-full left-0 right-0 mt-4 bg-black/95 border border-white/10 rounded-[2rem] p-4 shadow-4xl flex flex-col gap-2 z-[125] overflow-hidden"
-          style={{ 
-          backdropFilter: 'blur(30px)', 
-          WebkitBackdropFilter: 'blur(30px)' 
-          }}
-        >
-        {navItems.map((item) => (
-          <button 
-            key={item.id} 
-            onClick={() => scrollTo(item.id)} 
-            className={`w-full py-4 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 ${activeSection === item.id ? 'bg-amber-600 text-white' : 'bg-white/5 text-zinc-400'}`}
-          >
-            {item.label}
+        {/* Mobile/Tablet Layout (Compact Pill - strictly based on image_3ca570.png / Group 3) */}
+        <div className="lg:hidden flex items-center justify-between w-full max-w-2xl h-14 sm:h-16 px-6 bg-black/70 border border-white/10 rounded-full backdrop-blur-3xl shadow-2xl pointer-events-auto relative">
+          <button onClick={() => scrollTo('home')} className="flex items-center justify-center h-full">
+            <NavLogo className="scale-90" />
           </button>
-          ))}
-          </motion.div>
-          )}
+
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2.5 text-white active:scale-90 transition-transform relative z-[130] flex items-center justify-center"
+            aria-label="Toggle Menu"
+          >
+            {isMobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
+          </button>
+
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 20, scale: 1 }}
+                exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                className="absolute top-full left-0 right-0 mt-4 bg-black/95 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-4xl flex flex-col gap-3 z-[125] overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-600/10 blur-3xl rounded-full" />
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollTo(item.id)}
+                    className={`w-full py-5 text-[11px] font-bold uppercase tracking-widest rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 relative z-10 ${activeSection === item.id ? 'bg-amber-600 border-amber-500 text-white shadow-xl shadow-amber-600/20' : 'bg-white/5 border-white/5 text-zinc-400 active:bg-white/10'}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
           </AnimatePresence>
-          </div>
+        </div>
       </nav>
 
       <main className="relative z-10 w-full transform-gpu">
@@ -699,43 +692,92 @@ const App = () => {
       </footer>
 
       <style>{`
-          /* Standard Sci-Fi Fonts */
-          @import url('https://fonts.googleapis.com/css2?family=Keania+One&family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-  
-          :root { 
-            --font-phonk: 'Syncopate', sans-serif; 
-            --font-jakarta: 'Plus Jakarta Sans', sans-serif;
-          }
+        @import url('https://fonts.googleapis.com/css2?family=Keania+One&family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;700;800&display=swap');
+        
+        :root { 
+          --font-phonk: 'Syncopate', sans-serif; 
+          --font-keania: 'Keania One', cursive; 
+          --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+          --font-inter: 'Inter', sans-serif;
+        }
 
-          /* 1. iOS Safari 100vh Fix */
-          .min-h-screen { 
-            min-height: 100vh; 
-            min-height: calc(var(--vh, 1vh) * 100); 
-          }
+        html { 
+          scroll-behavior: smooth; 
+          scroll-padding-top: 60px; 
+          overflow-y: scroll;
+        }
 
-          /* 2. Remove Grey Tap Highlight on iPhone */
-          * { -webkit-tap-highlight-color: transparent; }
+        @media (min-width: 1024px) {
+          html { scroll-padding-top: 100px; }
+        }
 
-          /* 3. Force Retina Smoothness */
-          body { 
-            -webkit-font-smoothing: antialiased; 
-            text-rendering: optimizeLegibility;
-            padding-bottom: env(safe-area-inset-bottom);
-          }
+        body { 
+          background-color: #02040a; 
+          color: white; 
+          overflow-x: hidden; 
+          margin: 0; 
+          font-family: var(--font-jakarta); 
+          -webkit-font-smoothing: antialiased; 
+          text-rendering: optimizeLegibility;
+        }
 
-          /* 4. Safari Backdrop Blur Prefix */
-          .backdrop-blur-xl {
-            -webkit-backdrop-filter: blur(24px);
-            backdrop-filter: blur(24px);
-          }
+        .font-phonk { font-family: var(--font-phonk); }
+        .font-keania { font-family: var(--font-keania); }
+        .font-jakarta { font-family: var(--font-jakarta); }
+        .font-inter { font-family: var(--font-inter); }
+        
+        .grain-texture { 
+          background-image: url('https://grainy-gradients.vercel.app/noise.svg'); 
+          filter: contrast(180%) brightness(120%); 
+          position: fixed; inset: 0; opacity: 0.015; 
+        }
 
-          /* 5. Fluid Typography for Small Screens */
-          @media (max-width: 390px) { /* iPhone 12/13/14/15 size */
-            .font-phonk { letter-spacing: 0.1em !important; }
-            h1 { font-size: 3rem !important; }
-          }
-        `}</style>
-        </div>
+        @keyframes slow-pulse { 
+            0%, 100% { opacity: 0.3; transform: scale(1); } 
+            50% { opacity: 0.5; transform: scale(1.05); } 
+        }
+        .animate-slow-pulse { animation: slow-pulse 12s ease-in-out infinite; }
+        
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin-slow 15s linear infinite; }
+
+        .liquid-glass-effect {
+          --mouse-x: 50%;
+          --mouse-y: 50%;
+          position: relative;
+          will-change: transform, background;
+        }
+
+        @media (min-width: 768px) {
+            .liquid-glass-effect:hover {
+                background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.01) 100%) !important;
+            }
+        }
+
+        ::selection { background: rgba(217, 119, 6, 0.4); }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #02040a; }
+        ::-webkit-scrollbar-thumb { background: #1a1c2e; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d97706; }
+
+        .transform-gpu {
+          transform: translateZ(0);
+          backface-visibility: hidden;
+        }
+
+        input, button { font-size: inherit; }
+        
+        .min-h-screen { min-height: 100vh; min-height: 100dvh; }
+
+        @media (max-width: 640px) {
+          .nav-logo-text { font-size: 8px; }
+        }
+      `}</style>
+    </div>
   )
 }
 export default App;
